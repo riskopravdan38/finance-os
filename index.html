@@ -7217,6 +7217,54 @@
         // ============================================================
     // SUPABASE АВТОРИЗАЦИЯ
     // ============================================================
+    async function supabaseSignUp(email, password) {
+        const { data, error } = await window.supabaseClient.auth.signUp({ email, password });
+        if (error) { NotificationService.error('❌ ' + error.message); return null; }
+        NotificationService.success('✅ Аккаунт создан! Проверьте email.');
+        return data.user;
+    }
+
+    async function supabaseSignIn(email, password) {
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) { NotificationService.error('❌ ' + error.message); return null; }
+        NotificationService.success('✅ Добро пожаловать!');
+        return data.user;
+    }
+
+    async function supabaseSignOut() {
+        await window.supabaseClient.auth.signOut();
+        NotificationService.info('👋 Вы вышли из аккаунта');
+    }
+
+    function openSupabaseAuth() {
+        const overlay = document.getElementById('modal-generic');
+        const content = document.getElementById('modalContent');
+        if (!overlay || !content) return;
+        content.innerHTML = '<h3 class="title">🔐 Вход в Finance OS</h3><form id="supabaseAuthForm"><div class="input-group"><label>Email</label><input type="email" id="authEmail" required placeholder="you@example.com"></div><div class="input-group"><label>Пароль (мин 6 символов)</label><input type="password" id="authPassword" required minlength="6"></div><div class="flex gap-8" style="margin-top:16px;"><button type="submit" class="btn btn-primary w-full" id="authSubmitBtn">Войти</button><button type="button" class="btn btn-secondary w-full" onclick="closeModal()">Отмена</button></div></form>';
+        overlay.classList.add('active');
+        let isRegister = false;
+        document.getElementById('supabaseAuthForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const user = isRegister ? await supabaseSignUp(email, password) : await supabaseSignIn(email, password);
+            if (user) closeModal();
+        };
+        const form = document.getElementById('supabaseAuthForm');
+        const btn = document.getElementById('authSubmitBtn');
+        btn.addEventListener('dblclick', () => {
+            isRegister = !isRegister;
+            btn.textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
+        });
+    }
+
+    window.supabaseSignUp = supabaseSignUp;
+    window.supabaseSignIn = supabaseSignIn;
+    window.supabaseSignOut = supabaseSignOut;
+    window.openSupabaseAuth = openSupabaseAuth;
+        // ============================================================
+    // SUPABASE АВТОРИЗАЦИЯ
+    // ============================================================
 
     async function supabaseSignUp(email, password) {
         const { data, error } = await window.supabaseClient.auth.signUp({ email, password });
