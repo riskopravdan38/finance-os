@@ -8,6 +8,7 @@
     <meta name="color-scheme" content="dark light">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* ===== ТЕМЫ (38 штук) ===== */
         body.theme-nature { --neon: #4ADE80; --neon-2: #22C55E; --neon-glow: rgba(74, 222, 128, 0.4); --bg-primary: #0A1208; --bg-secondary: #0F1A0C; }
@@ -7213,6 +7214,84 @@
     }
 
     console.log('✅ Функции настроек восстановлены: saveSettings, saveCurrency, saveNotifications, saveAutoTemplates, setNewPin, resetAllData');
+        // ============================================================
+    // SUPABASE АВТОРИЗАЦИЯ
+    // ============================================================
+
+    async function supabaseSignUp(email, password) {
+        const { data, error } = await window.supabaseClient.auth.signUp({ email, password });
+        if (error) { NotificationService.error('❌ ' + error.message); return null; }
+        NotificationService.success('✅ Аккаунт создан! Проверьте email.');
+        return data.user;
+    }
+
+    async function supabaseSignIn(email, password) {
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) { NotificationService.error('❌ ' + error.message); return null; }
+        NotificationService.success('✅ Добро пожаловать!');
+        return data.user;
+    }
+
+    async function supabaseSignOut() {
+        await window.supabaseClient.auth.signOut();
+        NotificationService.info('👋 Вы вышли из аккаунта');
+    }
+
+    function openSupabaseAuth() {
+        const overlay = document.getElementById('modal-generic');
+        const content = document.getElementById('modalContent');
+        if (!overlay || !content) return;
+
+        content.innerHTML = `
+            <h3 class="title">🔐 Вход в Finance OS</h3>
+            <form id="supabaseAuthForm">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" required placeholder="you@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Пароль (минимум 6 символов)</label>
+                    <input type="password" id="authPassword" required minlength="6" placeholder="••••••">
+                </div>
+                <div class="flex gap-8" style="margin-top:16px;">
+                    <button type="submit" class="btn btn-primary w-full" id="authSubmitBtn">Войти</button>
+                    <button type="button" class="btn btn-secondary w-full" onclick="closeModal()">Отмена</button>
+                </div>
+                <div style="text-align:center;margin-top:16px;font-size:14px;">
+                    <a href="#" onclick="toggleAuthMode();return false;" id="authToggleLink" style="color:var(--neon);">
+                        Нет аккаунта? Зарегистрироваться
+                    </a>
+                </div>
+            </form>
+        `;
+
+        overlay.classList.add('active');
+
+        let isRegister = false;
+        window.toggleAuthMode = () => {
+            isRegister = !isRegister;
+            document.getElementById('authSubmitBtn').textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
+            document.getElementById('authToggleLink').textContent = isRegister ? 'Есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться';
+        };
+
+        document.getElementById('supabaseAuthForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            let user;
+            if (isRegister) {
+                user = await supabaseSignUp(email, password);
+            } else {
+                user = await supabaseSignIn(email, password);
+            }
+            if (user) closeModal();
+        };
+    }
+
+    window.supabaseSignUp = supabaseSignUp;
+    window.supabaseSignIn = supabaseSignIn;
+    window.supabaseSignOut = supabaseSignOut;
+    window.openSupabaseAuth = openSupabaseAuth;
     console.log('✅ FinanceOS — Часть 5 (обработчики, CRUD, ИИ) загружена!');
 </script>
 <script>
