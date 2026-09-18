@@ -13,5 +13,6 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 // Экспорт для использования в других частях приложения
 window.supabaseClient = supabaseClient;
-
+console.log('📍 URL:', SUPABASE_URL);
+console.log('📍 KEY (первые 20):', SUPABASE_ANON_KEY.substring(0, 20));
 console.log('✅ Supabase клиент инициализирован');
