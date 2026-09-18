@@ -48,6 +48,7 @@
         body.theme-monochrome { --bg-primary: #0A0A0A; --bg-secondary: #141414; --bg-card: rgba(20, 20, 20, 0.9); --bg-elevated: #1E1E1E; --text-primary: #FAFAFA; --text-secondary: #B0B0B0; --text-muted: #6A6A6A; --neon: #FFFFFF; --neon-2: #CCCCCC; --neon-glow: rgba(255, 255, 255, 0.25); --border-color: rgba(255, 255, 255, 0.12); --border-strong: rgba(255, 255, 255, 0.25); }
         body.theme-paper { --bg-primary: #FAF7F2; --bg-secondary: #FFFFFF; --bg-card: rgba(255, 255, 255, 0.95); --bg-elevated: #FFFFFF; --text-primary: #2A2A2A; --text-secondary: #6A6A6A; --text-muted: #999999; --neon: #4A4A4A; --neon-2: #2A2A2A; --neon-glow: rgba(74, 74, 74, 0.15); --border-color: rgba(0, 0, 0, 0.06); --border-strong: rgba(0, 0, 0, 0.14); }
         body.theme-purplehaze { --bg-primary: #1A0B2E; --bg-secondary: #2A1548; --bg-card: rgba(42, 21, 72, 0.75); --bg-elevated: #3A1F5E; --text-primary: #F3E8FF; --text-secondary: #C4B5FD; --text-muted: #7E5CB8; --neon: #C084FC; --neon-2: #A855F7; --neon-3: #F0ABFC; --neon-glow: rgba(192, 132, 252, 0.5); --border-color: rgba(196, 181, 253, 0.12); --border-strong: rgba(196, 181, 253, 0.3); }
+
         /* ============================================================
            FINANCE OS — DESIGN SYSTEM v9.0
            ============================================================ */
@@ -294,8 +295,7 @@
         .text-muted { color: var(--text-muted); }
         .text-neon { color: var(--neon); }
         .text-center { text-align: center; }
-
-        /* ===== НАВИГАЦИЯ ===== */
+                /* ===== НАВИГАЦИЯ ===== */
         .navbar {
             position: fixed;
             top: 12px;
@@ -1307,8 +1307,6 @@
         }
         *:focus-visible { outline: 2px solid var(--neon); outline-offset: 2px; border-radius: 4px; }
     </style>
-    <!-- Supabase JS Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div id="authOverlay">
@@ -1375,1387 +1373,1418 @@
     </div>
 
     <datalist id="shopList"></datalist>
-    <script src="supabase-config.js"></script>
-<script>
-    // ================================================================
-    // ЧАСТЬ 2: СЕРВИСЫ, ХРАНИЛИЩЕ, КЭШ, ТЕМЫ/ЛЕЙАУТЫ/МОДУЛИ
-    // ================================================================
 
-    // ============================================================
-    // КОНСТАНТЫ
-    // ============================================================
-    const CATEGORY_NAMES = {
-        'GROCERIES': 'Продукты',
-        'HOUSEHOLD': '🧹 Хозтовары',
-        'TRANSPORT': 'Транспорт',
-        'HEALTH': 'Здоровье',
-        'ENTERTAINMENT': 'Развлечения',
-        'BADHABIT': 'Вредные привычки',
-        'UTILITIES': 'ЖКХ',
-        'SALARY': 'Зарплата',
-        'BONUS': 'Премия',
-        'INVESTMENT': 'Инвестиции',
-        'GIFT': 'Подарок',
-        'PETS': '🐾 Животные',
-        'EDUCATION': '📚 Образование',
-        'REPAIR': '🔨 Ремонт',
-        'OTHER': 'Другое'
-    };
-
-    const ALL_CATEGORIES = [
-        'GROCERIES', 'HOUSEHOLD', 'TRANSPORT', 'HEALTH', 'ENTERTAINMENT',
-        'BADHABIT', 'UTILITIES', 'SALARY', 'BONUS', 'INVESTMENT', 'GIFT',
-        'PETS', 'EDUCATION', 'REPAIR', 'OTHER'
-    ];
-
-    const CATEGORY_ICONS = {
-        'GROCERIES': '🛒', 'HOUSEHOLD': '🧹', 'TRANSPORT': '🚗', 'HEALTH': '❤️',
-        'ENTERTAINMENT': '🎮', 'BADHABIT': '🚬', 'UTILITIES': '💡', 'SALARY': '💵',
-        'BONUS': '🎯', 'INVESTMENT': '📈', 'GIFT': '🎁', 'PETS': '🐾',
-        'EDUCATION': '📚', 'REPAIR': '🔨', 'OTHER': '📄'
-    };
-
-    const ALL_THEMES = [
-        'cosmos', 'nature', 'night', 'minimal', 'techno', 'barbarian', 'rose', 'sunset',
-        'brutalist', 'cyberpunk', 'vaporwave', 'metal', 'vanilla',
-        'coffee', 'ocean', 'sakura', 'terminal', 'luxe',
-        'nord', 'dracula', 'gruvbox', 'monokai', 'solarized', 'matrix',
-        'autumn', 'winter', 'spring', 'summer', 'fire', 'ice',
-        'emerald', 'royal', 'neonnoir', 'candy', 'rain',
-        'monochrome', 'paper', 'purplehaze'
-    ];
-
-    const THEME_NAMES = {
-        cosmos: '🌌 Космос', nature: '🌿 Природа', night: '🌙 Ночь', minimal: '☁️ Минимал',
-        techno: '🎛️ Техно', barbarian: '⚔️ Варвар', rose: '🌹 Роза', sunset: '🌅 Закат',
-        brutalist: '🏗️ Брутал', cyberpunk: '🤖 Киберпанк', vaporwave: '📼 Vaporwave',
-        metal: '🎸 Металл', vanilla: '🍦 Ваниль', coffee: '☕ Кофе', ocean: '🌊 Океан',
-        sakura: '🌸 Сакура', terminal: '💻 Терминал', luxe: '👑 Люкс',
-        nord: '❄️ Nord', dracula: '🧛 Dracula', gruvbox: '🟫 Gruvbox',
-        monokai: '🎨 Monokai', solarized: '🔆 Solarized', matrix: '🟢 Matrix',
-        autumn: '🍂 Осень', winter: '⛄ Зима', spring: '🌷 Весна', summer: '☀️ Лето',
-        fire: '🔥 Огонь', ice: '🧊 Лёд', emerald: '💚 Изумруд', royal: '⚜️ Royal',
-        neonnoir: '🌃 Neon Noir', candy: '🍬 Candy', rain: '🌧️ Rain',
-        monochrome: '⚫ Монохром', paper: '📄 Paper', purplehaze: '💜 Purple Haze'
-    };
-
-    const ALL_LAYOUTS = [
-        { id: 'classic', name: 'Классика', icon: '🏛️', desc: 'Верхняя навигация — привычный вид' },
-        { id: 'sidebar', name: 'Сайдбар', icon: '📐', desc: 'Боковая панель слева — больше места' },
-        { id: 'compact', name: 'Компакт', icon: '📊', desc: 'Плотные списки — максимум данных' },
-        { id: 'zen', name: 'Дзен', icon: '🧘', desc: 'Минимализм — фокус на контенте' },
-        { id: 'widgets', name: 'Виджеты', icon: '🧩', desc: 'Дашборд с плавающей кнопкой' },
-        { id: 'bottombar', name: 'Нижняя панель', icon: '📱', desc: 'Навигация снизу — mobile-first' },
-        { id: 'tabs', name: 'Табы', icon: '🗂️', desc: 'Крупные иконки-вкладки сверху' },
-        { id: 'masonry', name: 'Мозаика', icon: '🧱', desc: 'Плотная многоколоночная сетка' },
-        { id: 'split', name: 'Сплит', icon: '⚏', desc: 'Фильтры слева, контент справа' },
-        { id: 'timeline', name: 'Лента', icon: '📜', desc: 'Хронологический вид с точками' }
-    ];
-
-    const ALL_MODULES = [
-        { id: 'pantry', name: 'Кладовая', icon: '📦', desc: 'Продукты и запасы' },
-        { id: 'auto', name: 'Авто', icon: '🚗', desc: 'Машина, топливо, ремонты' },
-        { id: 'utilities', name: 'ЖКХ', icon: '🏠', desc: 'Коммунальные платежи' },
-        { id: 'subscriptions', name: 'Подписки', icon: '🔁', desc: 'Повторяющиеся платежи' },
-        { id: 'debts', name: 'Долги', icon: '💳', desc: 'Кредиты и займы' },
-        { id: 'tasks', name: 'Задачи', icon: '✅', desc: 'Список дел' },
-        { id: 'notes', name: 'Заметки', icon: '📝', desc: 'Личные записи' },
-        { id: 'dates', name: 'Даты', icon: '📅', desc: 'Дни рождения, события' },
-        { id: 'shops', name: 'Магазины', icon: '🏪', desc: 'Справочник и аналитика' },
-        { id: 'ai', name: 'ИИ-помощник', icon: '🤖', desc: 'Афина и инсайты' },
-        { id: 'investments', name: 'Инвестиции', icon: '📈', desc: 'Портфели и активы' },
-        { id: 'education', name: 'Образование', icon: '📚', desc: 'Расходы на обучение' },
-        { id: 'repair', name: 'Ремонт', icon: '🔨', desc: 'Проекты ремонта' },
-        { id: 'monthlyreport', name: 'Отчёт', icon: '📊', desc: 'Ежемесячный разбор' },
-        { id: 'analytics', name: 'Аналитика', icon: '📉', desc: 'Графики и статистика' },
-        { id: 'templates', name: 'Шаблоны', icon: '📋', desc: 'Автотранзакции' }
-    ];
-
-    const CORE_PAGES = ['dashboard', 'finance', 'settings'];
-
-    const DEFAULT_MODULES_STATE = ALL_MODULES.reduce((acc, m) => {
-        acc[m.id] = true;
-        return acc;
-    }, {});
-
-    // ============================================================
-    // ОПТИМИЗАЦИЯ: КЭШ В ПАМЯТИ
-    // ============================================================
-    // Все данные загружаются в память один раз и переиспользуются
-    // Это даёт ускорение в 5-10 раз при переходах между страницами
-    const DataCache = {
-        _cache: {},
-        _timestamps: {},
-        TTL: 30000, // 30 секунд — данные считаются свежими
-
-        async get(key, loader) {
-            const now = Date.now();
-            if (this._cache[key] && (now - (this._timestamps[key] || 0)) < this.TTL) {
-                return this._cache[key];
-            }
-            const value = await loader();
-            this._cache[key] = value;
-            this._timestamps[key] = now;
-            return value;
-        },
-
-        set(key, value) {
-            this._cache[key] = value;
-            this._timestamps[key] = Date.now();
-        },
-
-        invalidate(key) {
-            if (key) {
-                delete this._cache[key];
-                delete this._timestamps[key];
+    <script>
+        // ============================================================
+        // SUPABASE INIT — замени URL и ANON_KEY на свои
+        // ============================================================
+        (function() {
+            const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://YOUR-PROJECT.supabase.co';
+            const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'YOUR-ANON-KEY';
+            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                try {
+                    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                } catch (e) {
+                    console.warn('Supabase init failed:', e);
+                    window.supabaseClient = null;
+                }
             } else {
-                this._cache = {};
-                this._timestamps = {};
+                window.supabaseClient = null;
             }
-        },
+        })();
+    </script>
 
-        async refresh(key, loader) {
-            this.invalidate(key);
-            return await this.get(key, loader);
-        }
-    };
+    <script>
+        // ================================================================
+        // ЧАСТЬ 3: СЕРВИСЫ, ХРАНИЛИЩЕ, КЭШ, ТЕМЫ/ЛЕЙАУТЫ/МОДУЛИ
+        // ================================================================
 
-    // Утилита ArrayBuffer → Base64
-    function arrayBufferToBase64(buffer) {
-        const bytes = new Uint8Array(buffer);
-        let binary = '';
-        const chunkSize = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-            const chunk = bytes.subarray(i, i + chunkSize);
-            binary += String.fromCharCode.apply(null, chunk);
-        }
-        return btoa(binary);
-    }
+        // ============================================================
+        // КОНСТАНТЫ
+        // ============================================================
+        const CATEGORY_NAMES = {
+            'GROCERIES': 'Продукты',
+            'HOUSEHOLD': '🧹 Хозтовары',
+            'TRANSPORT': 'Транспорт',
+            'HEALTH': 'Здоровье',
+            'ENTERTAINMENT': 'Развлечения',
+            'BADHABIT': 'Вредные привычки',
+            'UTILITIES': 'ЖКХ',
+            'SALARY': 'Зарплата',
+            'BONUS': 'Премия',
+            'INVESTMENT': 'Инвестиции',
+            'GIFT': 'Подарок',
+            'PETS': '🐾 Животные',
+            'EDUCATION': '📚 Образование',
+            'REPAIR': '🔨 Ремонт',
+            'OTHER': 'Другое'
+        };
 
-    // ============================================================
-    // СЕРВИС УВЕДОМЛЕНИЙ
-    // ============================================================
-    const NotificationService = {
-        show(msg, type = 'info', duration = 4000) {
-            let container = document.getElementById('toastContainer');
-            if (!container) {
-                const div = document.createElement('div');
-                div.id = 'toastContainer';
-                div.className = 'toast-container';
-                document.body.appendChild(div);
-                container = div;
-            }
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = msg;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100px)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        },
-        success(msg) { this.show(msg, 'success'); },
-        error(msg) { this.show(msg, 'error'); },
-        info(msg) { this.show(msg, 'info'); },
-        warning(msg) { this.show(msg, 'warning'); }
-    };
+        const ALL_CATEGORIES = [
+            'GROCERIES', 'HOUSEHOLD', 'TRANSPORT', 'HEALTH', 'ENTERTAINMENT',
+            'BADHABIT', 'UTILITIES', 'SALARY', 'BONUS', 'INVESTMENT', 'GIFT',
+            'PETS', 'EDUCATION', 'REPAIR', 'OTHER'
+        ];
 
-    // ============================================================
-    // СЛУЖБА БЕЗОПАСНОСТИ (AES-GCM)
-    // ============================================================
-    const SecurityService = {
-        _key: null,
-        _salt: new TextEncoder().encode('PersonalFinanceOS_Salt_2024_secure_v9'),
-        _isInitialized: false,
+        const CATEGORY_ICONS = {
+            'GROCERIES': '🛒', 'HOUSEHOLD': '🧹', 'TRANSPORT': '🚗', 'HEALTH': '❤️',
+            'ENTERTAINMENT': '🎮', 'BADHABIT': '🚬', 'UTILITIES': '💡', 'SALARY': '💵',
+            'BONUS': '🎯', 'INVESTMENT': '📈', 'GIFT': '🎁', 'PETS': '🐾',
+            'EDUCATION': '📚', 'REPAIR': '🔨', 'OTHER': '📄'
+        };
 
-        async init(password) {
-            try {
-                const enc = new TextEncoder();
-                const keyMaterial = await crypto.subtle.importKey(
-                    'raw',
-                    enc.encode(password),
-                    { name: 'PBKDF2' },
-                    false,
-                    ['deriveKey']
-                );
-                this._key = await crypto.subtle.deriveKey(
-                    { name: 'PBKDF2', salt: this._salt, iterations: 100000, hash: 'SHA-256' },
-                    keyMaterial,
-                    { name: 'AES-GCM', length: 256 },
-                    false,
-                    ['encrypt', 'decrypt']
-                );
-                this._isInitialized = true;
-                return true;
-            } catch (e) {
-                console.error('Ошибка инициализации шифрования:', e);
-                return false;
-            }
-        },
+        const ALL_THEMES = [
+            'cosmos', 'nature', 'night', 'minimal', 'techno', 'barbarian', 'rose', 'sunset',
+            'brutalist', 'cyberpunk', 'vaporwave', 'metal', 'vanilla',
+            'coffee', 'ocean', 'sakura', 'terminal', 'luxe',
+            'nord', 'dracula', 'gruvbox', 'monokai', 'solarized', 'matrix',
+            'autumn', 'winter', 'spring', 'summer', 'fire', 'ice',
+            'emerald', 'royal', 'neonnoir', 'candy', 'rain',
+            'monochrome', 'paper', 'purplehaze'
+        ];
 
-        async encrypt(data) {
-            if (!this._isInitialized) throw new Error('Ключ не инициализирован');
-            const enc = new TextEncoder();
-            const iv = crypto.getRandomValues(new Uint8Array(12));
-            const encrypted = await crypto.subtle.encrypt(
-                { name: 'AES-GCM', iv },
-                this._key,
-                enc.encode(JSON.stringify(data))
-            );
-            const combined = new Uint8Array(iv.length + encrypted.byteLength);
-            combined.set(iv);
-            combined.set(new Uint8Array(encrypted), iv.length);
-            return arrayBufferToBase64(combined);
-        },
+        const THEME_NAMES = {
+            cosmos: '🌌 Космос', nature: '🌿 Природа', night: '🌙 Ночь', minimal: '☁️ Минимал',
+            techno: '🎛️ Техно', barbarian: '⚔️ Варвар', rose: '🌹 Роза', sunset: '🌅 Закат',
+            brutalist: '🏗️ Брутал', cyberpunk: '🤖 Киберпанк', vaporwave: '📼 Vaporwave',
+            metal: '🎸 Металл', vanilla: '🍦 Ваниль', coffee: '☕ Кофе', ocean: '🌊 Океан',
+            sakura: '🌸 Сакура', terminal: '💻 Терминал', luxe: '👑 Люкс',
+            nord: '❄️ Nord', dracula: '🧛 Dracula', gruvbox: '🟫 Gruvbox',
+            monokai: '🎨 Monokai', solarized: '🔆 Solarized', matrix: '🟢 Matrix',
+            autumn: '🍂 Осень', winter: '⛄ Зима', spring: '🌷 Весна', summer: '☀️ Лето',
+            fire: '🔥 Огонь', ice: '🧊 Лёд', emerald: '💚 Изумруд', royal: '⚜️ Royal',
+            neonnoir: '🌃 Neon Noir', candy: '🍬 Candy', rain: '🌧️ Rain',
+            monochrome: '⚫ Монохром', paper: '📄 Paper', purplehaze: '💜 Purple Haze'
+        };
 
-        async decrypt(encryptedData) {
-            if (!this._isInitialized) throw new Error('Ключ не инициализирован');
-            const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
-            const iv = combined.slice(0, 12);
-            const data = combined.slice(12);
-            const decrypted = await crypto.subtle.decrypt(
-                { name: 'AES-GCM', iv },
-                this._key,
-                data
-            );
-            return JSON.parse(new TextDecoder().decode(decrypted));
-        },
+        const ALL_LAYOUTS = [
+            { id: 'classic', name: 'Классика', icon: '🏛️', desc: 'Верхняя навигация — привычный вид' },
+            { id: 'sidebar', name: 'Сайдбар', icon: '📐', desc: 'Боковая панель слева — больше места' },
+            { id: 'compact', name: 'Компакт', icon: '📊', desc: 'Плотные списки — максимум данных' },
+            { id: 'zen', name: 'Дзен', icon: '🧘', desc: 'Минимализм — фокус на контенте' },
+            { id: 'widgets', name: 'Виджеты', icon: '🧩', desc: 'Дашборд с плавающей кнопкой' },
+            { id: 'bottombar', name: 'Нижняя панель', icon: '📱', desc: 'Навигация снизу — mobile-first' },
+            { id: 'tabs', name: 'Табы', icon: '🗂️', desc: 'Крупные иконки-вкладки сверху' },
+            { id: 'masonry', name: 'Мозаика', icon: '🧱', desc: 'Плотная многоколоночная сетка' },
+            { id: 'split', name: 'Сплит', icon: '⚏', desc: 'Фильтры слева, контент справа' },
+            { id: 'timeline', name: 'Лента', icon: '📜', desc: 'Хронологический вид с точками' }
+        ];
 
-        async hashPIN(pin) {
-            const enc = new TextEncoder();
-            const hash = await crypto.subtle.digest('SHA-256', enc.encode(pin));
-            return arrayBufferToBase64(hash);
-        }
-    };
+        const ALL_MODULES = [
+            { id: 'pantry', name: 'Кладовая', icon: '📦', desc: 'Продукты и запасы' },
+            { id: 'auto', name: 'Авто', icon: '🚗', desc: 'Машина, топливо, ремонты' },
+            { id: 'utilities', name: 'ЖКХ', icon: '🏠', desc: 'Коммунальные платежи' },
+            { id: 'subscriptions', name: 'Подписки', icon: '🔁', desc: 'Повторяющиеся платежи' },
+            { id: 'debts', name: 'Долги', icon: '💳', desc: 'Кредиты и займы' },
+            { id: 'tasks', name: 'Задачи', icon: '✅', desc: 'Список дел' },
+            { id: 'notes', name: 'Заметки', icon: '📝', desc: 'Личные записи' },
+            { id: 'dates', name: 'Даты', icon: '📅', desc: 'Дни рождения, события' },
+            { id: 'shops', name: 'Магазины', icon: '🏪', desc: 'Справочник и аналитика' },
+            { id: 'ai', name: 'ИИ-помощник', icon: '🤖', desc: 'Афина и инсайты' },
+            { id: 'investments', name: 'Инвестиции', icon: '📈', desc: 'Портфели и активы' },
+            { id: 'education', name: 'Образование', icon: '📚', desc: 'Расходы на обучение' },
+            { id: 'repair', name: 'Ремонт', icon: '🔨', desc: 'Проекты ремонта' },
+            { id: 'monthlyreport', name: 'Отчёт', icon: '📊', desc: 'Ежемесячный разбор' },
+            { id: 'analytics', name: 'Аналитика', icon: '📉', desc: 'Графики и статистика' },
+            { id: 'templates', name: 'Шаблоны', icon: '📋', desc: 'Автотранзакции' }
+        ];
 
-    // ============================================================
-    // ХРАНИЛИЩЕ С ШИФРОВАНИЕМ + КЭШЕМ
-    // ============================================================
-    const EncryptedStorage = {
-        async get(key, def) {
-            // Проверяем кэш
-            if (DataCache._cache[key] !== undefined) {
-                return DataCache._cache[key];
-            }
+        const CORE_PAGES = ['dashboard', 'finance', 'settings'];
 
-            const raw = localStorage.getItem(key);
-            if (!raw) {
-                DataCache.set(key, def);
-                return def;
-            }
-            try {
-                const value = await SecurityService.decrypt(raw);
-                DataCache.set(key, value);
+        const DEFAULT_MODULES_STATE = ALL_MODULES.reduce((acc, m) => {
+            acc[m.id] = true;
+            return acc;
+        }, {});
+
+        // ============================================================
+        // КЭШ В ПАМЯТИ
+        // ============================================================
+        const DataCache = {
+            _cache: {},
+            _timestamps: {},
+            TTL: 30000,
+
+            async get(key, loader) {
+                const now = Date.now();
+                if (this._cache[key] && (now - (this._timestamps[key] || 0)) < this.TTL) {
+                    return this._cache[key];
+                }
+                const value = await loader();
+                this._cache[key] = value;
+                this._timestamps[key] = now;
                 return value;
-            } catch {
-                DataCache.set(key, def);
-                return def;
-            }
-        },
+            },
 
-        async set(key, val) {
-            // Обновляем кэш
-            DataCache.set(key, val);
-            // Шифруем и сохраняем
-            const encrypted = await SecurityService.encrypt(val);
+            set(key, value) {
+                this._cache[key] = value;
+                this._timestamps[key] = Date.now();
+            },
+
+            invalidate(key) {
+                if (key) {
+                    delete this._cache[key];
+                    delete this._timestamps[key];
+                } else {
+                    this._cache = {};
+                    this._timestamps = {};
+                }
+            },
+
+            async refresh(key, loader) {
+                this.invalidate(key);
+                return await this.get(key, loader);
+            }
+        };
+
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            const chunkSize = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                const chunk = bytes.subarray(i, i + chunkSize);
+                binary += String.fromCharCode.apply(null, chunk);
+            }
+            return btoa(binary);
+        }
+
+        // ============================================================
+        // СЕРВИС УВЕДОМЛЕНИЙ
+        // ============================================================
+        const NotificationService = {
+            show(msg, type = 'info', duration = 4000) {
+                let container = document.getElementById('toastContainer');
+                if (!container) {
+                    const div = document.createElement('div');
+                    div.id = 'toastContainer';
+                    div.className = 'toast-container';
+                    document.body.appendChild(div);
+                    container = div;
+                }
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = msg;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            },
+            success(msg) { this.show(msg, 'success'); },
+            error(msg) { this.show(msg, 'error'); },
+            info(msg) { this.show(msg, 'info'); },
+            warning(msg) { this.show(msg, 'warning'); }
+        };
+
+        // ============================================================
+        // СЛУЖБА БЕЗОПАСНОСТИ (AES-GCM)
+        // ============================================================
+        const SecurityService = {
+            _key: null,
+            _salt: new TextEncoder().encode('PersonalFinanceOS_Salt_2024_secure_v9'),
+            _isInitialized: false,
+
+            async init(password) {
+                try {
+                    const enc = new TextEncoder();
+                    const keyMaterial = await crypto.subtle.importKey(
+                        'raw',
+                        enc.encode(password),
+                        { name: 'PBKDF2' },
+                        false,
+                        ['deriveKey']
+                    );
+                    this._key = await crypto.subtle.deriveKey(
+                        { name: 'PBKDF2', salt: this._salt, iterations: 100000, hash: 'SHA-256' },
+                        keyMaterial,
+                        { name: 'AES-GCM', length: 256 },
+                        false,
+                        ['encrypt', 'decrypt']
+                    );
+                    this._isInitialized = true;
+                    return true;
+                } catch (e) {
+                    console.error('Ошибка инициализации шифрования:', e);
+                    return false;
+                }
+            },
+
+            async encrypt(data) {
+                if (!this._isInitialized) throw new Error('Ключ не инициализирован');
+                const enc = new TextEncoder();
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const encrypted = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv },
+                    this._key,
+                    enc.encode(JSON.stringify(data))
+                );
+                const combined = new Uint8Array(iv.length + encrypted.byteLength);
+                combined.set(iv);
+                combined.set(new Uint8Array(encrypted), iv.length);
+                return arrayBufferToBase64(combined);
+            },
+
+            async decrypt(encryptedData) {
+                if (!this._isInitialized) throw new Error('Ключ не инициализирован');
+                const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+                const iv = combined.slice(0, 12);
+                const data = combined.slice(12);
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv },
+                    this._key,
+                    data
+                );
+                return JSON.parse(new TextDecoder().decode(decrypted));
+            },
+
+            async hashPIN(pin) {
+                const enc = new TextEncoder();
+                const hash = await crypto.subtle.digest('SHA-256', enc.encode(pin));
+                return arrayBufferToBase64(hash);
+            }
+        };
+
+        // ============================================================
+        // ХРАНИЛИЩЕ С ШИФРОВАНИЕМ + КЭШЕМ
+        // ============================================================
+        const EncryptedStorage = {
+            async get(key, def) {
+                if (DataCache._cache[key] !== undefined) {
+                    return DataCache._cache[key];
+                }
+                const raw = localStorage.getItem(key);
+                if (!raw) {
+                    DataCache.set(key, def);
+                    return def;
+                }
+                try {
+                    const value = await SecurityService.decrypt(raw);
+                    DataCache.set(key, value);
+                    return value;
+                } catch {
+                    DataCache.set(key, def);
+                    return def;
+                }
+            },
+
+            async set(key, val) {
+                DataCache.set(key, val);
+                const encrypted = await SecurityService.encrypt(val);
+                try {
+                    localStorage.setItem(key, encrypted);
+                } catch (e) {
+                    console.error('Ошибка записи в localStorage:', e);
+                    NotificationService.error('⚠️ Не хватает места для сохранения');
+                    throw e;
+                }
+            },
+
+            getPlain(key, def) {
+                const val = localStorage.getItem(key);
+                return val !== null ? val : def;
+            },
+
+            setPlain(key, val) {
+                localStorage.setItem(key, val);
+            },
+
+            clearCache() {
+                DataCache.invalidate();
+            }
+        };
+
+        // ============================================================
+        // БАЗА ДАННЫХ
+        // ============================================================
+        const DB = {
+            async getTransactions() { return await EncryptedStorage.get('transactions', []); },
+            async setTransactions(t) { await EncryptedStorage.set('transactions', t); },
+            async getPantry() { return await EncryptedStorage.get('pantry', []); },
+            async setPantry(p) { await EncryptedStorage.set('pantry', p); },
+            async getShoppingList() { return await EncryptedStorage.get('shoppingList', []); },
+            async setShoppingList(s) { await EncryptedStorage.set('shoppingList', s); },
+            async getBadHabits() { return await EncryptedStorage.get('badHabits', []); },
+            async setBadHabits(b) { await EncryptedStorage.set('badHabits', b); },
+            async getUser() { return await EncryptedStorage.get('user', { name: 'Пользователь', level: 1, xp: 0, coins: 0 }); },
+            async setUser(u) { await EncryptedStorage.set('user', u); },
+            async getMileageLogs() { return await EncryptedStorage.get('mileageLogs', []); },
+            async setMileageLogs(m) { await EncryptedStorage.set('mileageLogs', m); },
+            async getRefuels() { return await EncryptedStorage.get('refuels', []); },
+            async setRefuels(r) { await EncryptedStorage.set('refuels', r); },
+            async getRepairs() { return await EncryptedStorage.get('repairs', []); },
+            async setRepairs(r) { await EncryptedStorage.set('repairs', r); },
+            async getOilChanges() { return await EncryptedStorage.get('oilChanges', []); },
+            async setOilChanges(o) { await EncryptedStorage.set('oilChanges', o); },
+            async getCarInfo() { return await EncryptedStorage.get('carInfo', { currentMileage: 0, oilInterval: 10000, lastOilMileage: 0 }); },
+            async setCarInfo(c) { await EncryptedStorage.set('carInfo', c); },
+            async getUtilityReadings() { return await EncryptedStorage.get('utilityReadings', []); },
+            async setUtilityReadings(r) { await EncryptedStorage.set('utilityReadings', r); },
+            async getUtilityTariffs() { return await EncryptedStorage.get('utilityTariffs', { gas: 8.5, electricity: 4.5, cold_water: 35, hot_water: 160, heating: 1800, tbo: 250 }); },
+            async setUtilityTariffs(t) { await EncryptedStorage.set('utilityTariffs', t); },
+            async getSubscriptions() { return await EncryptedStorage.get('subscriptions', []); },
+            async setSubscriptions(s) { await EncryptedStorage.set('subscriptions', s); },
+            async getDebts() { return await EncryptedStorage.get('debts', []); },
+            async setDebts(d) { await EncryptedStorage.set('debts', d); },
+            async getTasks() { return await EncryptedStorage.get('tasks', []); },
+            async setTasks(t) { await EncryptedStorage.set('tasks', t); },
+            async getNotes() { return await EncryptedStorage.get('notes', []); },
+            async setNotes(n) { await EncryptedStorage.set('notes', n); },
+            async getDates() { return await EncryptedStorage.get('dates', []); },
+            async setDates(d) { await EncryptedStorage.set('dates', d); },
+            async getShops() { return await EncryptedStorage.get('shops', []); },
+            async setShops(s) { await EncryptedStorage.set('shops', s); },
+            async getPurchaseItems() { return await EncryptedStorage.get('purchaseItems', []); },
+            async setPurchaseItems(p) { await EncryptedStorage.set('purchaseItems', p); },
+            async getFamily() { return await EncryptedStorage.get('family', []); },
+            async setFamily(f) { await EncryptedStorage.set('family', f); },
+            async getBudgets() { return await EncryptedStorage.get('budgets', {}); },
+            async setBudgets(b) { await EncryptedStorage.set('budgets', b); },
+            async getTemplates() { return await EncryptedStorage.get('templates', []); },
+            async setTemplates(t) { await EncryptedStorage.set('templates', t); },
+            async getSettings() {
+                const def = {
+                    name: 'Пользователь',
+                    gender: 'male',
+                    monthStartDay: 1,
+                    theme: 'cosmos',
+                    layout: 'classic',
+                    modules: null,
+                    autoTemplates: false,
+                    notifications: true,
+                    currency: 'RUB'
+                };
+                return await EncryptedStorage.get('settings', def);
+            },
+            async setSettings(s) { await EncryptedStorage.set('settings', s); },
+            async getWizardDone() { return await EncryptedStorage.get('wizardDone', false); },
+            async setWizardDone(v) { await EncryptedStorage.set('wizardDone', v); },
+            async getEducationExpenses() { return await EncryptedStorage.get('educationExpenses', []); },
+            async setEducationExpenses(e) { await EncryptedStorage.set('educationExpenses', e); },
+            async getRepairProjects() { return await EncryptedStorage.get('repairProjects', []); },
+            async setRepairProjects(r) { await EncryptedStorage.set('repairProjects', r); },
+            async getRepairExpenses() { return await EncryptedStorage.get('repairExpenses', []); },
+            async setRepairExpenses(r) { await EncryptedStorage.set('repairExpenses', r); }
+        };
+
+        // ============================================================
+        // ИНВЕСТИЦИОННОЕ ХРАНИЛИЩЕ
+        // ============================================================
+        const InvestmentStorage = {
+            async getPortfolios() { return await EncryptedStorage.get('investPortfolios', []); },
+            async setPortfolios(p) { await EncryptedStorage.set('investPortfolios', p); },
+            async getAssets() { return await EncryptedStorage.get('investAssets', []); },
+            async setAssets(a) { await EncryptedStorage.set('investAssets', a); },
+            async getTransactions() { return await EncryptedStorage.get('investTransactions', []); },
+            async setTransactions(t) { await EncryptedStorage.set('investTransactions', t); },
+            async getTaxReminders() { return await EncryptedStorage.get('investTaxReminders', []); },
+            async setTaxReminders(t) { await EncryptedStorage.set('investTaxReminders', t); }
+        };
+
+        // ============================================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================================
+        function getToday() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDate(d) {
+            if (!d) return '—';
             try {
-                localStorage.setItem(key, encrypted);
-            } catch (e) {
-                console.error('Ошибка записи в localStorage:', e);
-                NotificationService.error('⚠️ Не хватает места для сохранения');
-                throw e;
-            }
-        },
-
-        getPlain(key, def) {
-            const val = localStorage.getItem(key);
-            return val !== null ? val : def;
-        },
-
-        setPlain(key, val) {
-            localStorage.setItem(key, val);
-        },
-
-        // Очистить кэш (при импорте данных)
-        clearCache() {
-            DataCache.invalidate();
-        }
-    };
-
-    // ============================================================
-    // БАЗА ДАННЫХ
-    // ============================================================
-    const DB = {
-        async getTransactions() { return await EncryptedStorage.get('transactions', []); },
-        async setTransactions(t) { await EncryptedStorage.set('transactions', t); },
-        async getPantry() { return await EncryptedStorage.get('pantry', []); },
-        async setPantry(p) { await EncryptedStorage.set('pantry', p); },
-        async getShoppingList() { return await EncryptedStorage.get('shoppingList', []); },
-        async setShoppingList(s) { await EncryptedStorage.set('shoppingList', s); },
-        async getBadHabits() { return await EncryptedStorage.get('badHabits', []); },
-        async setBadHabits(b) { await EncryptedStorage.set('badHabits', b); },
-        async getUser() { return await EncryptedStorage.get('user', { name: 'Пользователь', level: 1, xp: 0, coins: 0 }); },
-        async setUser(u) { await EncryptedStorage.set('user', u); },
-        async getMileageLogs() { return await EncryptedStorage.get('mileageLogs', []); },
-        async setMileageLogs(m) { await EncryptedStorage.set('mileageLogs', m); },
-        async getRefuels() { return await EncryptedStorage.get('refuels', []); },
-        async setRefuels(r) { await EncryptedStorage.set('refuels', r); },
-        async getRepairs() { return await EncryptedStorage.get('repairs', []); },
-        async setRepairs(r) { await EncryptedStorage.set('repairs', r); },
-        async getOilChanges() { return await EncryptedStorage.get('oilChanges', []); },
-        async setOilChanges(o) { await EncryptedStorage.set('oilChanges', o); },
-        async getCarInfo() { return await EncryptedStorage.get('carInfo', { currentMileage: 0, oilInterval: 10000, lastOilMileage: 0 }); },
-        async setCarInfo(c) { await EncryptedStorage.set('carInfo', c); },
-        async getUtilityReadings() { return await EncryptedStorage.get('utilityReadings', []); },
-        async setUtilityReadings(r) { await EncryptedStorage.set('utilityReadings', r); },
-        async getUtilityTariffs() { return await EncryptedStorage.get('utilityTariffs', { gas: 8.5, electricity: 4.5, cold_water: 35, hot_water: 160, heating: 1800, tbo: 250 }); },
-        async setUtilityTariffs(t) { await EncryptedStorage.set('utilityTariffs', t); },
-        async getSubscriptions() { return await EncryptedStorage.get('subscriptions', []); },
-        async setSubscriptions(s) { await EncryptedStorage.set('subscriptions', s); },
-        async getDebts() { return await EncryptedStorage.get('debts', []); },
-        async setDebts(d) { await EncryptedStorage.set('debts', d); },
-        async getTasks() { return await EncryptedStorage.get('tasks', []); },
-        async setTasks(t) { await EncryptedStorage.set('tasks', t); },
-        async getNotes() { return await EncryptedStorage.get('notes', []); },
-        async setNotes(n) { await EncryptedStorage.set('notes', n); },
-        async getDates() { return await EncryptedStorage.get('dates', []); },
-        async setDates(d) { await EncryptedStorage.set('dates', d); },
-        async getShops() { return await EncryptedStorage.get('shops', []); },
-        async setShops(s) { await EncryptedStorage.set('shops', s); },
-        async getPurchaseItems() { return await EncryptedStorage.get('purchaseItems', []); },
-        async setPurchaseItems(p) { await EncryptedStorage.set('purchaseItems', p); },
-        async getFamily() { return await EncryptedStorage.get('family', []); },
-        async setFamily(f) { await EncryptedStorage.set('family', f); },
-        async getBudgets() { return await EncryptedStorage.get('budgets', {}); },
-        async setBudgets(b) { await EncryptedStorage.set('budgets', b); },
-        async getTemplates() { return await EncryptedStorage.get('templates', []); },
-        async setTemplates(t) { await EncryptedStorage.set('templates', t); },
-        async getSettings() {
-            const def = {
-                name: 'Пользователь',
-                gender: 'male',
-                monthStartDay: 1,
-                theme: 'cosmos',
-                layout: 'classic',
-                modules: null,
-                autoTemplates: false,
-                notifications: true,
-                currency: 'RUB'
-            };
-            return await EncryptedStorage.get('settings', def);
-        },
-        async setSettings(s) { await EncryptedStorage.set('settings', s); },
-        async getWizardDone() { return await EncryptedStorage.get('wizardDone', false); },
-        async setWizardDone(v) { await EncryptedStorage.set('wizardDone', v); },
-        async getEducationExpenses() { return await EncryptedStorage.get('educationExpenses', []); },
-        async setEducationExpenses(e) { await EncryptedStorage.set('educationExpenses', e); },
-        async getRepairProjects() { return await EncryptedStorage.get('repairProjects', []); },
-        async setRepairProjects(r) { await EncryptedStorage.set('repairProjects', r); },
-        async getRepairExpenses() { return await EncryptedStorage.get('repairExpenses', []); },
-        async setRepairExpenses(r) { await EncryptedStorage.set('repairExpenses', r); }
-    };
-
-    // ============================================================
-    // ИНВЕСТИЦИОННОЕ ХРАНИЛИЩЕ
-    // ============================================================
-    const InvestmentStorage = {
-        async getPortfolios() { return await EncryptedStorage.get('investPortfolios', []); },
-        async setPortfolios(p) { await EncryptedStorage.set('investPortfolios', p); },
-        async getAssets() { return await EncryptedStorage.get('investAssets', []); },
-        async setAssets(a) { await EncryptedStorage.set('investAssets', a); },
-        async getTransactions() { return await EncryptedStorage.get('investTransactions', []); },
-        async setTransactions(t) { await EncryptedStorage.set('investTransactions', t); },
-        async getTaxReminders() { return await EncryptedStorage.get('investTaxReminders', []); },
-        async setTaxReminders(t) { await EncryptedStorage.set('investTaxReminders', t); }
-    };
-
-    // ============================================================
-    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-    // ============================================================
-    function getToday() {
-        const d = new Date();
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    function formatDate(d) {
-        if (!d) return '—';
-        try {
-            return new Date(d).toLocaleDateString('ru-RU');
-        } catch {
-            return d;
-        }
-    }
-
-    function generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-    }
-
-    // ---------- ВАЛЮТА ----------
-    let _cachedCurrency = 'RUB';
-    let _currencyCacheTime = 0;
-
-    async function refreshCurrency(force = false) {
-        const now = Date.now();
-        if (force || (now - _currencyCacheTime > 60000)) {
-            try {
-                const settings = await DB.getSettings();
-                _cachedCurrency = settings.currency || 'RUB';
-                _currencyCacheTime = now;
+                return new Date(d).toLocaleDateString('ru-RU');
             } catch {
-                _cachedCurrency = 'RUB';
-                _currencyCacheTime = now;
+                return d;
             }
         }
-        return _cachedCurrency;
-    }
 
-    function formatMoney(v) {
-        const cur = _cachedCurrency || 'RUB';
-        const sym = { RUB: '₽', USD: '$', EUR: '€' };
-        const num = Number(v) || 0;
-        return num.toFixed(0) + ' ' + (sym[cur] || '₽');
-    }
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
 
-    // ---------- ПЕРИОДЫ ----------
-    function getCurrentPeriod(monthStartDay) {
-        const now = new Date();
-        let year = now.getFullYear(),
-            month = now.getMonth(),
-            day = now.getDate();
-        let startDate, endDate;
-        if (day >= monthStartDay) {
-            startDate = new Date(year, month, monthStartDay);
-            endDate = new Date(year, month + 1, monthStartDay - 1);
-            if (endDate < startDate) endDate = new Date(year, month + 2, 0);
-        } else {
-            startDate = new Date(year, month - 1, monthStartDay);
-            endDate = new Date(year, month, monthStartDay - 1);
-            if (endDate < startDate) endDate = new Date(year, month, 0);
-        }
-        if (startDate > now) {
-            startDate = new Date(year, month - 2, monthStartDay);
-            endDate = new Date(year, month - 1, monthStartDay - 1);
-        }
-        return { start: startDate, end: endDate };
-    }
+        // ---------- ВАЛЮТА ----------
+        let _cachedCurrency = 'RUB';
+        let _currencyCacheTime = 0;
 
-    // ---------- ГЕЙМИФИКАЦИЯ ----------
-    async function addXP(amount) {
-        const user = await DB.getUser();
-        user.xp += amount;
-        const newLevel = Math.floor(user.xp / 100) + 1;
-        if (newLevel > user.level) {
-            user.level = newLevel;
-            NotificationService.success('🎉 Уровень ' + newLevel + '!');
-        }
-        user.coins = (user.coins || 0) + Math.floor(amount / 10);
-        await DB.setUser(user);
-        await renderAll();
-    }
-
-    // ============================================================
-    // УПРАВЛЕНИЕ ТЕМАМИ
-    // ============================================================
-    function setTheme(name) {
-        document.body.classList.remove(...ALL_THEMES.map(t => 'theme-' + t));
-        if (name !== 'cosmos') {
-            document.body.classList.add('theme-' + name);
-        }
-        localStorage.setItem('app_theme', name);
-        DB.getSettings().then(settings => {
-            settings.theme = name;
-            DB.setSettings(settings);
-        }).catch(() => {});
-        const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) {
-            const colors = {
-                cosmos: '#00E5B4', nature: '#4ADE80', night: '#7C8CFF', minimal: '#4A6FA5',
-                techno: '#A855F7', barbarian: '#F97316', rose: '#EC4899', sunset: '#FB923C',
-                brutalist: '#FF2E2E', cyberpunk: '#00FFF0', vaporwave: '#FF71CE', metal: '#DC2626',
-                vanilla: '#D97757', coffee: '#C89B68', ocean: '#2DD4BF', sakura: '#FFB7C5',
-                terminal: '#33FF33', luxe: '#D4AF37', nord: '#88C0D0', dracula: '#BD93F9',
-                gruvbox: '#D79921', monokai: '#A6E22E', solarized: '#B58900', matrix: '#00FF41',
-                autumn: '#E87A3E', winter: '#7DD3FC', spring: '#22C55E', summer: '#F59E0B',
-                fire: '#F97316', ice: '#06B6D4', emerald: '#10B981', royal: '#D4AF37',
-                neonnoir: '#A855F7', candy: '#EC4899', rain: '#7C9CC4',
-                monochrome: '#FFFFFF', paper: '#4A4A4A', purplehaze: '#C084FC'
-            };
-            meta.setAttribute('content', colors[name] || '#00E5B4');
-        }
-    }
-
-    function toggleTheme() {
-        const current = localStorage.getItem('app_theme') || 'cosmos';
-        const idx = ALL_THEMES.indexOf(current);
-        const next = ALL_THEMES[(idx + 1) % ALL_THEMES.length];
-        setTheme(next);
-        NotificationService.info('🎨 Тема: ' + (THEME_NAMES[next] || next));
-    }
-
-    // ============================================================
-    // УПРАВЛЕНИЕ ЛЕЙАУТАМИ
-    // ============================================================
-    function setLayout(name) {
-        const allIds = ALL_LAYOUTS.map(l => 'layout-' + l.id);
-        document.body.classList.remove(...allIds);
-        if (name !== 'classic') {
-            document.body.classList.add('layout-' + name);
-        }
-        localStorage.setItem('app_layout', name);
-        const fab = document.getElementById('fabContainer');
-        if (fab) {
-            fab.style.display = name === 'widgets' ? 'flex' : 'none';
-        }
-        DB.getSettings().then(settings => {
-            settings.layout = name;
-            DB.setSettings(settings);
-        }).catch(() => {});
-        if (currentPageName === 'settings') {
-            renderAll();
-        }
-    }
-
-    function getLayout() {
-        return localStorage.getItem('app_layout') || 'classic';
-    }
-
-    function initLayout() {
-        const saved = getLayout();
-        const allIds = ALL_LAYOUTS.map(l => 'layout-' + l.id);
-        document.body.classList.remove(...allIds);
-        if (saved !== 'classic') {
-            document.body.classList.add('layout-' + saved);
-        }
-        const fab = document.getElementById('fabContainer');
-        if (fab) {
-            fab.style.display = saved === 'widgets' ? 'flex' : 'none';
-        }
-    }
-
-    function toggleFab() {
-        const items = document.querySelector('.fab-items');
-        const main = document.querySelector('.fab-main');
-        if (items) items.classList.toggle('active');
-        if (main) main.classList.toggle('active');
-    }
-
-    function fabAction(action) {
-        toggleFab();
-        setTimeout(() => {
-            if (action === 'transaction') openModal('addTransaction');
-            else if (action === 'pantry') openModal('addPantry');
-            else if (action === 'task') openModal('addTask');
-            else if (action === 'note') openModal('addNote');
-            else if (action === 'subscription') openModal('addSubscription');
-        }, 200);
-    }
-
-    // ============================================================
-    // УПРАВЛЕНИЕ МОДУЛЯМИ
-    // ============================================================
-    async function getModules() {
-        const settings = await DB.getSettings();
-        if (!settings.modules) {
-            settings.modules = { ...DEFAULT_MODULES_STATE };
-            await DB.setSettings(settings);
-        }
-        for (const key of Object.keys(DEFAULT_MODULES_STATE)) {
-            if (settings.modules[key] === undefined) {
-                settings.modules[key] = true;
+        async function refreshCurrency(force = false) {
+            const now = Date.now();
+            if (force || (now - _currencyCacheTime > 60000)) {
+                try {
+                    const settings = await DB.getSettings();
+                    _cachedCurrency = settings.currency || 'RUB';
+                    _currencyCacheTime = now;
+                } catch {
+                    _cachedCurrency = 'RUB';
+                    _currencyCacheTime = now;
+                }
             }
+            return _cachedCurrency;
         }
-        return settings.modules;
-    }
 
-    async function isModuleEnabled(moduleId) {
-        if (CORE_PAGES.includes(moduleId)) return true;
-        const modules = await getModules();
-        return modules[moduleId] !== false;
-    }
+        function formatMoney(v) {
+            const cur = _cachedCurrency || 'RUB';
+            const sym = { RUB: '₽', USD: '$', EUR: '€' };
+            const num = Number(v) || 0;
+            return num.toFixed(0) + ' ' + (sym[cur] || '₽');
+        }
 
-    async function setModuleEnabled(moduleId, enabled) {
-        const settings = await DB.getSettings();
-        if (!settings.modules) settings.modules = { ...DEFAULT_MODULES_STATE };
-        settings.modules[moduleId] = !!enabled;
-        await DB.setSettings(settings);
-        await updateNavVisibility();
-        if (!enabled && currentPageName === moduleId) {
-            await navigateTo('dashboard');
-        } else if (currentPageName === 'settings') {
+        // ---------- ПЕРИОДЫ ----------
+        function getCurrentPeriod(monthStartDay) {
+            const now = new Date();
+            let year = now.getFullYear(),
+                month = now.getMonth(),
+                day = now.getDate();
+            let startDate, endDate;
+            if (day >= monthStartDay) {
+                startDate = new Date(year, month, monthStartDay);
+                endDate = new Date(year, month + 1, monthStartDay - 1);
+                if (endDate < startDate) endDate = new Date(year, month + 2, 0);
+            } else {
+                startDate = new Date(year, month - 1, monthStartDay);
+                endDate = new Date(year, month, monthStartDay - 1);
+                if (endDate < startDate) endDate = new Date(year, month, 0);
+            }
+            if (startDate > now) {
+                startDate = new Date(year, month - 2, monthStartDay);
+                endDate = new Date(year, month - 1, monthStartDay - 1);
+            }
+            return { start: startDate, end: endDate };
+        }
+
+        // ---------- ГЕЙМИФИКАЦИЯ ----------
+        async function addXP(amount) {
+            const user = await DB.getUser();
+            user.xp += amount;
+            const newLevel = Math.floor(user.xp / 100) + 1;
+            if (newLevel > user.level) {
+                user.level = newLevel;
+                NotificationService.success('🎉 Уровень ' + newLevel + '!');
+            }
+            user.coins = (user.coins || 0) + Math.floor(amount / 10);
+            await DB.setUser(user);
             await renderAll();
         }
-    }
 
-    async function updateNavVisibility() {
-        const modules = await getModules();
-        document.querySelectorAll('.nav-links a').forEach(a => {
-            const page = a.dataset.page;
-            if (!page) return;
-            if (CORE_PAGES.includes(page)) {
-                a.parentElement.style.display = '';
-                return;
+        // ============================================================
+        // УПРАВЛЕНИЕ ТЕМАМИ (FIX: перерисовка настроек)
+        // ============================================================
+        function setTheme(name) {
+            document.body.classList.remove(...ALL_THEMES.map(t => 'theme-' + t));
+            if (name !== 'cosmos') {
+                document.body.classList.add('theme-' + name);
             }
-            const enabled = modules[page] !== false;
-            a.parentElement.style.display = enabled ? '' : 'none';
-        });
-    }
+            localStorage.setItem('app_theme', name);
+            DB.getSettings().then(settings => {
+                settings.theme = name;
+                DB.setSettings(settings);
+            }).catch(() => {});
+            // FIX: перерисовка страницы настроек
+            if (typeof currentPageName !== 'undefined' && currentPageName === 'settings') {
+                setTimeout(() => { try { renderAll(); } catch(_){} }, 0);
+            }
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) {
+                const colors = {
+                    cosmos: '#00E5B4', nature: '#4ADE80', night: '#7C8CFF', minimal: '#4A6FA5',
+                    techno: '#A855F7', barbarian: '#F97316', rose: '#EC4899', sunset: '#FB923C',
+                    brutalist: '#FF2E2E', cyberpunk: '#00FFF0', vaporwave: '#FF71CE', metal: '#DC2626',
+                    vanilla: '#D97757', coffee: '#C89B68', ocean: '#2DD4BF', sakura: '#FFB7C5',
+                    terminal: '#33FF33', luxe: '#D4AF37', nord: '#88C0D0', dracula: '#BD93F9',
+                    gruvbox: '#D79921', monokai: '#A6E22E', solarized: '#B58900', matrix: '#00FF41',
+                    autumn: '#E87A3E', winter: '#7DD3FC', spring: '#22C55E', summer: '#F59E0B',
+                    fire: '#F97316', ice: '#06B6D4', emerald: '#10B981', royal: '#D4AF37',
+                    neonnoir: '#A855F7', candy: '#EC4899', rain: '#7C9CC4',
+                    monochrome: '#FFFFFF', paper: '#4A4A4A', purplehaze: '#C084FC'
+                };
+                meta.setAttribute('content', colors[name] || '#00E5B4');
+            }
+        }
 
-    async function toggleModule(moduleId) {
-        const enabled = await isModuleEnabled(moduleId);
-        await setModuleEnabled(moduleId, !enabled);
-    }
+        function toggleTheme() {
+            const current = localStorage.getItem('app_theme') || 'cosmos';
+            const idx = ALL_THEMES.indexOf(current);
+            const next = ALL_THEMES[(idx + 1) % ALL_THEMES.length];
+            setTheme(next);
+            NotificationService.info('🎨 Тема: ' + (THEME_NAMES[next] || next));
+        }
 
-    async function resetAllModules() {
-        if (!confirm('Включить все модули обратно?')) return;
-        const settings = await DB.getSettings();
-        settings.modules = { ...DEFAULT_MODULES_STATE };
-        await DB.setSettings(settings);
-        await updateNavVisibility();
-        await renderAll();
-        NotificationService.success('✅ Все модули включены');
-    }
+        // ============================================================
+        // УПРАВЛЕНИЕ ЛЕЙАУТАМИ
+        // ============================================================
+        function setLayout(name) {
+            const allIds = ALL_LAYOUTS.map(l => 'layout-' + l.id);
+            document.body.classList.remove(...allIds);
+            if (name !== 'classic') {
+                document.body.classList.add('layout-' + name);
+            }
+            localStorage.setItem('app_layout', name);
+            const fab = document.getElementById('fabContainer');
+            if (fab) {
+                fab.style.display = name === 'widgets' ? 'flex' : 'none';
+            }
+            DB.getSettings().then(settings => {
+                settings.layout = name;
+                DB.setSettings(settings);
+            }).catch(() => {});
+            if (currentPageName === 'settings') {
+                renderAll();
+            }
+        }
 
-    // ============================================================
-    // ЭКСПОРТ / ИМПОРТ
-    // ============================================================
-    async function exportData() {
-        const data = {
-            transactions: await DB.getTransactions(),
-            pantry: await DB.getPantry(),
-            shoppingList: await DB.getShoppingList(),
-            mileageLogs: await DB.getMileageLogs(),
-            refuels: await DB.getRefuels(),
-            repairs: await DB.getRepairs(),
-            oilChanges: await DB.getOilChanges(),
-            carInfo: await DB.getCarInfo(),
-            utilityReadings: await DB.getUtilityReadings(),
-            utilityTariffs: await DB.getUtilityTariffs(),
-            subscriptions: await DB.getSubscriptions(),
-            debts: await DB.getDebts(),
-            tasks: await DB.getTasks(),
-            notes: await DB.getNotes(),
-            dates: await DB.getDates(),
-            shops: await DB.getShops(),
-            purchaseItems: await DB.getPurchaseItems(),
-            user: await DB.getUser(),
-            budgets: await DB.getBudgets(),
-            templates: await DB.getTemplates(),
-            settings: await DB.getSettings(),
-            investPortfolios: await InvestmentStorage.getPortfolios(),
-            investAssets: await InvestmentStorage.getAssets(),
-            investTransactions: await InvestmentStorage.getTransactions(),
-            investTaxReminders: await InvestmentStorage.getTaxReminders(),
-            educationExpenses: await DB.getEducationExpenses(),
-            repairProjects: await DB.getRepairProjects(),
-            repairExpenses: await DB.getRepairExpenses()
-        };
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `finance_backup_${getToday()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        NotificationService.success('✅ Данные экспортированы!');
-    }
+        function getLayout() {
+            return localStorage.getItem('app_layout') || 'classic';
+        }
 
-    async function importData() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(ev) {
+        function initLayout() {
+            const saved = getLayout();
+            const allIds = ALL_LAYOUTS.map(l => 'layout-' + l.id);
+            document.body.classList.remove(...allIds);
+            if (saved !== 'classic') {
+                document.body.classList.add('layout-' + saved);
+            }
+            const fab = document.getElementById('fabContainer');
+            if (fab) {
+                fab.style.display = saved === 'widgets' ? 'flex' : 'none';
+            }
+        }
+
+        function toggleFab() {
+            const items = document.querySelector('.fab-items');
+            const main = document.querySelector('.fab-main');
+            if (items) items.classList.toggle('active');
+            if (main) main.classList.toggle('active');
+        }
+
+        function fabAction(action) {
+            toggleFab();
+            setTimeout(() => {
+                if (action === 'transaction') openModal('addTransaction');
+                else if (action === 'pantry') openModal('addPantry');
+                else if (action === 'task') openModal('addTask');
+                else if (action === 'note') openModal('addNote');
+                else if (action === 'subscription') openModal('addSubscription');
+            }, 200);
+        }
+
+        // ============================================================
+        // УПРАВЛЕНИЕ МОДУЛЯМИ
+        // ============================================================
+        async function getModules() {
+            const settings = await DB.getSettings();
+            if (!settings.modules) {
+                settings.modules = { ...DEFAULT_MODULES_STATE };
+                await DB.setSettings(settings);
+            }
+            for (const key of Object.keys(DEFAULT_MODULES_STATE)) {
+                if (settings.modules[key] === undefined) {
+                    settings.modules[key] = true;
+                }
+            }
+            return settings.modules;
+        }
+
+        async function isModuleEnabled(moduleId) {
+            if (CORE_PAGES.includes(moduleId)) return true;
+            const modules = await getModules();
+            return modules[moduleId] !== false;
+        }
+
+        async function setModuleEnabled(moduleId, enabled) {
+            const settings = await DB.getSettings();
+            if (!settings.modules) settings.modules = { ...DEFAULT_MODULES_STATE };
+            settings.modules[moduleId] = !!enabled;
+            await DB.setSettings(settings);
+            await updateNavVisibility();
+            if (!enabled && currentPageName === moduleId) {
+                await navigateTo('dashboard');
+            } else if (currentPageName === 'settings') {
+                await renderAll();
+            }
+        }
+
+        async function updateNavVisibility() {
+            const modules = await getModules();
+            document.querySelectorAll('.nav-links a').forEach(a => {
+                const page = a.dataset.page;
+                if (!page) return;
+                if (CORE_PAGES.includes(page)) {
+                    a.parentElement.style.display = '';
+                    return;
+                }
+                const enabled = modules[page] !== false;
+                a.parentElement.style.display = enabled ? '' : 'none';
+            });
+        }
+
+        async function toggleModule(moduleId) {
+            const enabled = await isModuleEnabled(moduleId);
+            await setModuleEnabled(moduleId, !enabled);
+        }
+
+        async function resetAllModules() {
+            if (!confirm('Включить все модули обратно?')) return;
+            const settings = await DB.getSettings();
+            settings.modules = { ...DEFAULT_MODULES_STATE };
+            await DB.setSettings(settings);
+            await updateNavVisibility();
+            await renderAll();
+            NotificationService.success('✅ Все модули включены');
+        }
+
+        // ============================================================
+        // ЭКСПОРТ / ИМПОРТ
+        // ============================================================
+        async function exportData() {
+            const data = {
+                transactions: await DB.getTransactions(),
+                pantry: await DB.getPantry(),
+                shoppingList: await DB.getShoppingList(),
+                mileageLogs: await DB.getMileageLogs(),
+                refuels: await DB.getRefuels(),
+                repairs: await DB.getRepairs(),
+                oilChanges: await DB.getOilChanges(),
+                carInfo: await DB.getCarInfo(),
+                utilityReadings: await DB.getUtilityReadings(),
+                utilityTariffs: await DB.getUtilityTariffs(),
+                subscriptions: await DB.getSubscriptions(),
+                debts: await DB.getDebts(),
+                tasks: await DB.getTasks(),
+                notes: await DB.getNotes(),
+                dates: await DB.getDates(),
+                shops: await DB.getShops(),
+                purchaseItems: await DB.getPurchaseItems(),
+                user: await DB.getUser(),
+                budgets: await DB.getBudgets(),
+                templates: await DB.getTemplates(),
+                settings: await DB.getSettings(),
+                investPortfolios: await InvestmentStorage.getPortfolios(),
+                investAssets: await InvestmentStorage.getAssets(),
+                investTransactions: await InvestmentStorage.getTransactions(),
+                investTaxReminders: await InvestmentStorage.getTaxReminders(),
+                educationExpenses: await DB.getEducationExpenses(),
+                repairProjects: await DB.getRepairProjects(),
+                repairExpenses: await DB.getRepairExpenses()
+            };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `finance_backup_${getToday()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            NotificationService.success('✅ Данные экспортированы!');
+        }
+
+        async function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async function(ev) {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (data.transactions) await DB.setTransactions(data.transactions);
+                        if (data.pantry) await DB.setPantry(data.pantry);
+                        if (data.shoppingList) await DB.setShoppingList(data.shoppingList);
+                        if (data.mileageLogs) await DB.setMileageLogs(data.mileageLogs);
+                        if (data.refuels) await DB.setRefuels(data.refuels);
+                        if (data.repairs) await DB.setRepairs(data.repairs);
+                        if (data.oilChanges) await DB.setOilChanges(data.oilChanges);
+                        if (data.carInfo) await DB.setCarInfo(data.carInfo);
+                        if (data.utilityReadings) await DB.setUtilityReadings(data.utilityReadings);
+                        if (data.utilityTariffs) await DB.setUtilityTariffs(data.utilityTariffs);
+                        if (data.subscriptions) await DB.setSubscriptions(data.subscriptions);
+                        if (data.debts) await DB.setDebts(data.debts);
+                        if (data.tasks) await DB.setTasks(data.tasks);
+                        if (data.notes) await DB.setNotes(data.notes);
+                        if (data.dates) await DB.setDates(data.dates);
+                        if (data.shops) await DB.setShops(data.shops);
+                        if (data.purchaseItems) await DB.setPurchaseItems(data.purchaseItems);
+                        if (data.user) await DB.setUser(data.user);
+                        if (data.budgets) await DB.setBudgets(data.budgets);
+                        if (data.templates) await DB.setTemplates(data.templates);
+                        if (data.settings) await DB.setSettings(data.settings);
+                        if (data.investPortfolios) await InvestmentStorage.setPortfolios(data.investPortfolios);
+                        if (data.investAssets) await InvestmentStorage.setAssets(data.investAssets);
+                        if (data.investTransactions) await InvestmentStorage.setTransactions(data.investTransactions);
+                        if (data.investTaxReminders) await InvestmentStorage.setTaxReminders(data.investTaxReminders);
+                        if (data.educationExpenses) await DB.setEducationExpenses(data.educationExpenses);
+                        if (data.repairProjects) await DB.setRepairProjects(data.repairProjects);
+                        if (data.repairExpenses) await DB.setRepairExpenses(data.repairExpenses);
+                        NotificationService.success('✅ Данные импортированы!');
+                        await refreshCurrency(true);
+                        await renderAll();
+                    } catch (err) {
+                        NotificationService.error('❌ Ошибка импорта: неверный файл');
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ============================================================
+        // УВЕДОМЛЕНИЯ СИСТЕМЫ
+        // ============================================================
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+
+        function sendNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
                 try {
-                    const data = JSON.parse(ev.target.result);
-                    if (data.transactions) await DB.setTransactions(data.transactions);
-                    if (data.pantry) await DB.setPantry(data.pantry);
-                    if (data.shoppingList) await DB.setShoppingList(data.shoppingList);
-                    if (data.mileageLogs) await DB.setMileageLogs(data.mileageLogs);
-                    if (data.refuels) await DB.setRefuels(data.refuels);
-                    if (data.repairs) await DB.setRepairs(data.repairs);
-                    if (data.oilChanges) await DB.setOilChanges(data.oilChanges);
-                    if (data.carInfo) await DB.setCarInfo(data.carInfo);
-                    if (data.utilityReadings) await DB.setUtilityReadings(data.utilityReadings);
-                    if (data.utilityTariffs) await DB.setUtilityTariffs(data.utilityTariffs);
-                    if (data.subscriptions) await DB.setSubscriptions(data.subscriptions);
-                    if (data.debts) await DB.setDebts(data.debts);
-                    if (data.tasks) await DB.setTasks(data.tasks);
-                    if (data.notes) await DB.setNotes(data.notes);
-                    if (data.dates) await DB.setDates(data.dates);
-                    if (data.shops) await DB.setShops(data.shops);
-                    if (data.purchaseItems) await DB.setPurchaseItems(data.purchaseItems);
-                    if (data.user) await DB.setUser(data.user);
-                    if (data.budgets) await DB.setBudgets(data.budgets);
-                    if (data.templates) await DB.setTemplates(data.templates);
-                    if (data.settings) await DB.setSettings(data.settings);
-                    if (data.investPortfolios) await InvestmentStorage.setPortfolios(data.investPortfolios);
-                    if (data.investAssets) await InvestmentStorage.setAssets(data.investAssets);
-                    if (data.investTransactions) await InvestmentStorage.setTransactions(data.investTransactions);
-                    if (data.investTaxReminders) await InvestmentStorage.setTaxReminders(data.investTaxReminders);
-                    if (data.educationExpenses) await DB.setEducationExpenses(data.educationExpenses);
-                    if (data.repairProjects) await DB.setRepairProjects(data.repairProjects);
-                    if (data.repairExpenses) await DB.setRepairExpenses(data.repairExpenses);
-                    NotificationService.success('✅ Данные импортированы!');
-                    await refreshCurrency(true);
+                    new Notification(title, { body, icon: '📊' });
+                } catch (e) {
+                    console.warn('Не удалось отправить уведомление:', e);
+                }
+            }
+        }
+
+        // ---------- СОВЕТЫ ДНЯ ----------
+        const TIPS_OF_DAY = [
+            "Начните откладывать 10% от каждого дохода — это изменит вашу жизнь через год.",
+            "Проверьте подписки: возможно, вы платите за то, чем не пользуетесь.",
+            "Сравните цены в 3 магазинах перед крупной покупкой — экономия до 30%.",
+            "Поставьте финансовую цель на месяц и отслеживайте прогресс каждый день.",
+            "Инвестируйте в себя — книги, курсы, здоровье окупаются быстрее акций.",
+            "Создайте подушку безопасности — 3–6 месячных расходов.",
+            "Используйте кэшбэк-сервисы и карты с возвратом процентов.",
+            "Планируйте покупки заранее — импульсивные траты съедают бюджет.",
+            "Откажитесь от одной вредной привычки и направьте сэкономленное на инвестиции.",
+            "Каждый месяц пересматривайте бюджет — корректируйте, если что-то пошло не так.",
+            "Не берите кредиты на вещи, которые теряют в цене.",
+            "Диверсифицируйте инвестиции — не кладите все яйца в одну корзину.",
+            "Изучайте финансовую грамотность — знание сила.",
+            "Ставьте реалистичные финансовые цели и разбивайте их на шаги.",
+            "Автоматизируйте сбережения — переводите деньги на накопительный счёт в день зарплаты.",
+            "Следите за инфляцией — деньги должны работать, а не лежать под подушкой.",
+            "Обсуждайте финансы с семьёй — общие цели легче достигаются.",
+            "Периодически пересматривайте свои страховки — возможно, вы переплачиваете.",
+            "Используйте налоговые вычеты — это законный способ вернуть часть налогов.",
+            "Не бойтесь просить скидку — часто её можно получить.",
+            "Ведите учёт всех расходов — это помогает видеть картину целиком.",
+            "Создайте фонд на крупные покупки — не берите кредиты на всё подряд.",
+            "Изучите возможности пассивного дохода — дивиденды, аренда, проценты.",
+            "Помните: богатство — это не доход, а накопления и правильное управление.",
+            "Регулярно анализируйте свой инвестиционный портфель.",
+            "Не поддавайтесь панике на рынках — долгосрочные инвестиции выигрывают.",
+            "Начните с малого — даже 500 рублей в месяц вложения изменят будущее.",
+            "Определите свои финансовые ценности — на что вы тратите с удовольствием?",
+            "Используйте приложения для учёта финансов — это дисциплинирует.",
+            "Не сравнивайте свой путь с другими — у каждого свои возможности и цели.",
+            "Помните, что богатство — это состояние ума, а не кошелька.",
+            "Каждый день делайте хотя бы одно действие, приближающее вас к финансовой свободе.",
+            "Пересмотрите свои расходы на развлечения — возможно, есть бесплатные альтернативы.",
+            "Научитесь говорить 'нет' ненужным тратам.",
+            "Создайте систему мотивации — например, награждайте себя за экономию.",
+            "Помните о законе Парето: 20% усилий дают 80% результата.",
+            "Изучайте опыт успешных инвесторов, но не копируйте слепо.",
+            "Инвестируйте в то, что понимаете.",
+            "Не бойтесь ошибок — они учат лучше, чем успех.",
+            "Регулярно проверяйте кредитную историю.",
+            "Пользуйтесь бесплатными банковскими услугами — не переплачивайте.",
+            "Создайте финансовый дневник и записывайте свои мысли о деньгах.",
+            "Помните: время на вашей стороне — начните инвестировать сегодня.",
+            "Не вкладывайте деньги в сомнительные проекты — лучше изучите тему.",
+            "Ставьте финансовые цели на год, 5 лет, 10 лет.",
+            "Обсуждайте финансы с друзьями — это укрепляет финансовую культуру.",
+            "Используйте правило 50/30/20 для бюджета.",
+            "Помните, что финансовая независимость — это марафон, а не спринт."
+        ];
+
+        function getTipOfDay() {
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+            const index = dayOfYear % TIPS_OF_DAY.length;
+            return TIPS_OF_DAY[index];
+        }
+
+        // ---------- МАНТРЫ ----------
+        const MANTRAS = [
+            "Я управляю своими деньгами, а не они мной.",
+            "Каждая копейка приближает меня к свободе.",
+            "Я выбираю тратить с умом и радоваться жизни.",
+            "Мои финансовые решения — это инвестиции в моё будущее.",
+            "Я знаю, куда идут мои деньги, и это даёт мне силу.",
+            "Богатство начинается с правильного мышления.",
+            "Я способен накапливать и приумножать.",
+            "Мои доходы растут, потому что я верю в себя.",
+            "Каждый день я становлюсь финансово грамотнее.",
+            "Я планирую, действую и достигаю целей.",
+            "Финансовая свобода — это результат моих ежедневных усилий.",
+            "Я достоин финансового изобилия.",
+            "Деньги — это инструмент для жизни, которую я выбираю.",
+            "Я благодарен за каждый рубль, который приходит в мою жизнь.",
+            "Мои инвестиции работают на меня.",
+            "Я создаю богатство с любовью и уважением к деньгам.",
+            "Каждая трата — это выбор, и я делаю осознанный выбор.",
+            "Я умею говорить 'нет' импульсивным покупкам.",
+            "Мой бюджет — это план моего успеха.",
+            "Я спокоен и уверен в своём финансовом будущем.",
+            "Я привлекаю деньги легко и с радостью.",
+            "Мои финансовые цели ясны, и я иду к ним.",
+            "Я умею зарабатывать и сохранять.",
+            "Деньги приходят ко мне всё более щедрым потоком.",
+            "Я живу в изобилии, и деньги — лишь его часть.",
+            "Каждый день я улучшаю свои финансовые привычки.",
+            "Я достоин больших доходов и с радостью их принимаю.",
+            "Мои деньги работают на мои мечты.",
+            "Я благодарен за свой доход и умею его приумножать.",
+            "Финансовая грамотность — мой суперсила.",
+            "Я в гармонии с деньгами.",
+            "Мои накопления растут с каждым месяцем.",
+            "Я наслаждаюсь процессом создания богатства.",
+            "Мой финансовый план работает, и я верю в него.",
+            "Я принимаю правильные финансовые решения каждый день.",
+            "Деньги — это энергия, и я направляю её в нужное русло.",
+            "Я создаю пассивный доход, и он растёт.",
+            "Мои инвестиции приносят плоды.",
+            "Я умею ждать и видеть долгосрочную выгоду.",
+            "Моя жизнь становится лучше с каждым финансовым шагом.",
+            "Я благодарен за финансовые уроки, которые получаю.",
+            "Я смело иду к своим финансовым целям.",
+            "Моё финансовое будущее светлое и стабильное.",
+            "Я ценю деньги и правильно ими распоряжаюсь.",
+            "Я всегда нахожу возможности для роста доходов.",
+            "Мои расходы контролируемы и разумны.",
+            "Я строю капитал с умом и терпением.",
+            "Деньги не главное, но с ними я чувствую себя свободнее.",
+            "Я привлекаю финансовые возможности.",
+            "Каждый день я становлюсь ближе к финансовой независимости.",
+            "Я умею радоваться жизни, не тратя лишнего.",
+            "Мои финансовые привычки — основа моего успеха.",
+            "Я знаю, что могу достичь любых целей, если планирую бюджет.",
+            "Деньги — это не цель, а средство для жизни моей мечты.",
+            "Я в ответе за свои финансы и горжусь этим.",
+            "Мои инвестиции — это мой вклад в будущее.",
+            "Я умею копить и радоваться накоплениям.",
+            "Каждый месяц я становлюсь богаче и мудрее.",
+            "Я достоин финансового изобилия и принимаю его.",
+            "Мои доходы превышают расходы, и я расту.",
+            "Я наслаждаюсь процессом управления деньгами.",
+            "Финансовая грамотность открывает передо мной двери.",
+            "Я благодарен за все возможности, которые дают мне деньги.",
+            "Я инвестирую в себя и своё будущее каждый день.",
+            "Мои финансовые цели вдохновляют меня.",
+            "Я умею откладывать деньги и не чувствовать дискомфорта.",
+            "Деньги приходят ко мне легко и естественно.",
+            "Я управляю своим бюджетом с лёгкостью.",
+            "Мои накопления дают мне чувство безопасности.",
+            "Я создаю богатство с радостью и благодарностью.",
+            "Каждая моя покупка — это осознанный выбор.",
+            "Я умею наслаждаться жизнью, не нарушая бюджет.",
+            "Моя финансовая дисциплина делает меня сильнее.",
+            "Я горжусь своими финансовыми достижениями.",
+            "Деньги — это инструмент, а не хозяин моей жизни.",
+            "Я каждый день делаю шаг к финансовой свободе.",
+            "Мои инвестиции работают, даже когда я сплю.",
+            "Я умею создавать денежный поток.",
+            "Благосостояние — это результат моих привычек.",
+            "Я достоин жить в достатке и уверенности.",
+            "Мои финансовые цели достижимы, и я доказываю это.",
+            "Я умею управлять рисками и инвестировать с умом.",
+            "Каждый день я благодарю деньги за возможности, которые они дают."
+        ];
+
+        function getMantraOfDay() {
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+            const index = dayOfYear % MANTRAS.length;
+            return MANTRAS[index];
+        }
+
+        function sendDailyTip() {
+            const tip = getTipOfDay();
+            sendNotification('💡 Совет дня по финансам', tip);
+        }
+
+        function scheduleDailyTips() {
+            const now = new Date();
+            const times = [{ h: 9, m: 0 }, { h: 14, m: 0 }, { h: 19, m: 0 }];
+            times.forEach(({ h, m }) => {
+                const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+                if (target <= now) target.setDate(target.getDate() + 1);
+                const delay = target - now;
+                setTimeout(() => {
+                    sendDailyTip();
+                    setInterval(sendDailyTip, 86400000);
+                }, delay);
+            });
+        }
+
+        // ============================================================
+        // ДЕБАУНС
+        // ============================================================
+        function debounce(fn, delay) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // ---------- ПАГИНАЦИЯ ----------
+        let currentPage = 1;
+        const pageSize = 20;
+
+        // ============================================================
+        // ЦВЕТА МАГАЗИНОВ
+        // ============================================================
+        const SHOP_COLORS = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9',
+            '#FDCB6E', '#E17055', '#00B894', '#6C5CE7', '#F8A5C2',
+            '#74B9FF', '#55EFC4', '#FAB1A0', '#81ECEC', '#D6A2E8'
+        ];
+
+        async function getShopColor(shopName, shops = null) {
+            if (!shopName) return '#6C7A8D';
+            if (!shops) {
+                shops = await DB.getShops();
+            }
+            const shop = shops.find(s => s.name.toLowerCase() === shopName.toLowerCase());
+            if (shop && shop.color) {
+                return shop.color;
+            }
+            const existingColors = shops.map(s => s.color).filter(c => c);
+            const availableColors = SHOP_COLORS.filter(c => !existingColors.includes(c));
+            const color = availableColors.length > 0
+                ? availableColors[0]
+                : SHOP_COLORS[Math.floor(Math.random() * SHOP_COLORS.length)];
+            if (shop) {
+                shop.color = color;
+                await DB.setShops(shops);
+            }
+            return color;
+        }
+
+        // ============================================================
+        // FIX: автоназначение цветов магазинам
+        // ============================================================
+        async function getColorsForGoods(goodNames) {
+            const purchases = await DB.getPurchaseItems();
+            let shops = await DB.getShops();
+
+            // Автоназначение цветов магазинам без цвета
+            const usedColors = new Set(shops.map(s => s.color).filter(Boolean));
+            let assigned = false;
+            for (const s of shops) {
+                if (!s.color) {
+                    const free = SHOP_COLORS.find(c => !usedColors.has(c));
+                    s.color = free || SHOP_COLORS[Math.floor(Math.random() * SHOP_COLORS.length)];
+                    usedColors.add(s.color);
+                    assigned = true;
+                }
+            }
+            if (assigned) await DB.setShops(shops);
+
+            const shopMap = {};
+            shops.forEach(s => { shopMap[s.name.toLowerCase()] = s.color || '#6C7A8D'; });
+
+            // Строим индекс последних покупок за один проход
+            const lastPurchaseMap = {};
+            for (const p of purchases) {
+                const key = p.name.toLowerCase().trim();
+                const existing = lastPurchaseMap[key];
+                if (!existing || new Date(p.date) > new Date(existing.date)) {
+                    lastPurchaseMap[key] = p;
+                }
+            }
+
+            const result = {};
+            for (const name of goodNames) {
+                const key = name.toLowerCase().trim();
+                const last = lastPurchaseMap[key];
+                result[name] = (last && last.store && shopMap[last.store.toLowerCase()])
+                    ? shopMap[last.store.toLowerCase()]
+                    : '#6C7A8D';
+            }
+            return result;
+        }
+
+        async function getColorForGood(goodName) {
+            const map = await getColorsForGoods([goodName]);
+            return map[goodName] || '#6C7A8D';
+        }
+
+        async function refreshShopDatalist() {
+            const shops = await DB.getShops();
+            const datalist = document.getElementById('shopList');
+            if (datalist) {
+                datalist.innerHTML = shops.map(s => `<option value="${s.name}">`).join('');
+            }
+        }
+
+        // ============================================================
+        // АНАЛИЗ ТОВАРОВ
+        // ============================================================
+        async function analyzeGoods(year, month) {
+            const purchases = await DB.getPurchaseItems();
+            const start = new Date(year, month - 1, 1);
+            const end = new Date(year, month, 1);
+            const prevStart = new Date(year, month - 2, 1);
+            const prevEnd = new Date(year, month - 1, 1);
+
+            const currentPurchases = purchases.filter(p => {
+                const d = new Date(p.date);
+                return d >= start && d < end;
+            });
+            const prevPurchases = purchases.filter(p => {
+                const d = new Date(p.date);
+                return d >= prevStart && d < prevEnd;
+            });
+
+            const currentMap = {};
+            currentPurchases.forEach(p => {
+                const key = p.name.toLowerCase().trim();
+                if (!currentMap[key]) currentMap[key] = { prices: [], names: [] };
+                currentMap[key].prices.push(p.price);
+                currentMap[key].names.push(p.name);
+            });
+            const prevMap = {};
+            prevPurchases.forEach(p => {
+                const key = p.name.toLowerCase().trim();
+                if (!prevMap[key]) prevMap[key] = { prices: [], names: [] };
+                prevMap[key].prices.push(p.price);
+                prevMap[key].names.push(p.name);
+            });
+
+            const goods = [];
+            const allKeys = new Set([...Object.keys(currentMap), ...Object.keys(prevMap)]);
+            for (const key of allKeys) {
+                const current = currentMap[key];
+                const prev = prevMap[key];
+                const avgCurrent = current ? current.prices.reduce((a, b) => a + b, 0) / current.prices.length : null;
+                const avgPrev = prev ? prev.prices.reduce((a, b) => a + b, 0) / prev.prices.length : null;
+                const countCurrent = current ? current.prices.length : 0;
+                const countPrev = prev ? prev.prices.length : 0;
+                const name = current ? current.names[0] : (prev ? prev.names[0] : key);
+                goods.push({
+                    name,
+                    key,
+                    avgCurrent,
+                    avgPrev,
+                    countCurrent,
+                    countPrev,
+                    change: (avgCurrent !== null && avgPrev !== null && avgPrev > 0)
+                        ? ((avgCurrent - avgPrev) / avgPrev * 100)
+                        : null
+                });
+            }
+
+            const basketGoods = goods.filter(g => g.countCurrent + g.countPrev >= 2);
+            let inflation = null;
+            if (basketGoods.length > 0) {
+                const totalCurrent = basketGoods.reduce((sum, g) => sum + (g.avgCurrent || 0), 0);
+                const totalPrev = basketGoods.reduce((sum, g) => sum + (g.avgPrev || 0), 0);
+                if (totalPrev > 0) {
+                    inflation = ((totalCurrent - totalPrev) / totalPrev) * 100;
+                }
+            }
+
+            const withChange = goods.filter(g => g.change !== null && g.countCurrent > 0 && g.countPrev > 0);
+            const sortedByChange = [...withChange].sort((a, b) => b.change - a.change);
+            const topRisers = sortedByChange.slice(0, 5);
+            const topFallers = sortedByChange.slice(-5).reverse();
+
+            const tips = [];
+            topRisers.forEach(g => {
+                if (g.change > 10) {
+                    tips.push(`📈 ${g.name}: цена выросла на ${g.change.toFixed(1)}% за месяц. Поищите аналоги в других магазинах.`);
+                }
+            });
+            topFallers.forEach(g => {
+                if (g.change < -5) {
+                    tips.push(`📉 ${g.name}: цена снизилась на ${Math.abs(g.change).toFixed(1)}%. Выгодно закупиться сейчас.`);
+                }
+            });
+
+            const popularGoods = goods.filter(g => g.countCurrent + g.countPrev >= 3).slice(0, 6);
+            const sixMonthsData = [];
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(year, month - 1 - i, 1);
+                const y = d.getFullYear();
+                const m = d.getMonth() + 1;
+                const startM = new Date(y, m - 1, 1);
+                const endM = new Date(y, m, 1);
+                const monthPurchases = purchases.filter(p => {
+                    const pd = new Date(p.date);
+                    return pd >= startM && pd < endM;
+                });
+                const monthMap = {};
+                monthPurchases.forEach(p => {
+                    const key = p.name.toLowerCase().trim();
+                    if (!monthMap[key]) monthMap[key] = [];
+                    monthMap[key].push(p.price);
+                });
+                const monthAvg = {};
+                for (const key of Object.keys(monthMap)) {
+                    monthAvg[key] = monthMap[key].reduce((a, b) => a + b, 0) / monthMap[key].length;
+                }
+                sixMonthsData.push({
+                    label: `${m}/${y}`,
+                    goods: popularGoods.map(g => ({
+                        name: g.name,
+                        price: monthAvg[g.key] || null
+                    }))
+                });
+            }
+
+            return {
+                goods,
+                basketGoods,
+                inflation,
+                topRisers,
+                topFallers,
+                tips,
+                sixMonthsData,
+                popularGoods
+            };
+        }
+
+        // ============================================================
+        // ИНСАЙТЫ И БЫСТРЫЕ ДЕЙСТВИЯ
+        // ============================================================
+        async function generateInsights() {
+            const insights = [];
+            const settings = await DB.getSettings();
+            const period = getCurrentPeriod(settings.monthStartDay || 1);
+            const txs = await DB.getTransactions();
+            const periodTxs = txs.filter(t => { const d = new Date(t.date); return d >= period.start && d <= period.end; });
+
+            const totalExpense = periodTxs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+            const totalIncome = periodTxs.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+            const balance = totalIncome - totalExpense;
+
+            const prevStart = new Date(period.start);
+            prevStart.setMonth(prevStart.getMonth() - 1);
+            const prevEnd = new Date(period.end);
+            prevEnd.setMonth(prevEnd.getMonth() - 1);
+            const prevTxs = txs.filter(t => { const d = new Date(t.date); return d >= prevStart && d <= prevEnd; });
+            const prevExpense = prevTxs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+            if (prevExpense > 0) {
+                const change = ((totalExpense - prevExpense) / prevExpense) * 100;
+                if (change > 20) {
+                    insights.push({ icon: '📈', type: 'danger', text: `Расходы выросли на ${change.toFixed(0)}% по сравнению с прошлым периодом. Стоит проверить, где именно перерасход.` });
+                } else if (change < -10) {
+                    insights.push({ icon: '📉', type: 'success', text: `Ты сократил расходы на ${Math.abs(change).toFixed(0)}% — так держать! Экономия составляет примерно ${formatMoney(prevExpense - totalExpense)}.` });
+                }
+            }
+
+            const catSpend = {};
+            periodTxs.filter(t => t.type === 'EXPENSE').forEach(t => {
+                catSpend[t.category] = (catSpend[t.category] || 0) + t.amount;
+            });
+            const topCat = Object.entries(catSpend).sort((a, b) => b[1] - a[1])[0];
+            if (topCat && totalExpense > 0) {
+                const pct = ((topCat[1] / totalExpense) * 100).toFixed(0);
+                if (pct > 40) {
+                    insights.push({ icon: '🔥', type: 'warning', text: `${CATEGORY_NAMES[topCat[0]]} — ${pct}% всех расходов (${formatMoney(topCat[1])}). Попробуй установить бюджет на эту категорию.` });
+                } else {
+                    insights.push({ icon: '📊', text: `Крупнейшая категория — ${CATEGORY_NAMES[topCat[0]]}: ${formatMoney(topCat[1])} (${pct}% от всех расходов).` });
+                }
+            }
+
+            const today = new Date();
+            const daysInPeriod = Math.ceil((period.end - period.start) / (1000 * 60 * 60 * 24));
+            const daysPassed = Math.max(1, Math.ceil((today - period.start) / (1000 * 60 * 60 * 24)));
+            if (daysPassed > 3 && daysInPeriod > 0) {
+                const dailyRate = totalExpense / daysPassed;
+                const forecast = totalIncome - (dailyRate * daysInPeriod);
+                if (forecast < 0) {
+                    insights.push({ icon: '⚠️', type: 'danger', text: `При текущем темпе к концу периода расходы превысят доходы на ${formatMoney(Math.abs(forecast))}.` });
+                } else if (forecast > 0 && totalIncome > 0) {
+                    insights.push({ icon: '💰', type: 'success', text: `Прогноз на конец периода: сможешь отложить около ${formatMoney(forecast)}, если сохранишь текущий темп.` });
+                }
+            }
+
+            const pantry = await DB.getPantry();
+            const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
+            const expired = pantry.filter(i => i.expiry && new Date(i.expiry) < todayDate);
+            const expiring = pantry.filter(i => {
+                if (!i.expiry) return false;
+                const ed = new Date(i.expiry); ed.setHours(0,0,0,0);
+                const threeDays = new Date(todayDate); threeDays.setDate(threeDays.getDate() + 3);
+                return ed >= todayDate && ed <= threeDays;
+            });
+            if (expired.length > 0) {
+                insights.push({ icon: '🚨', type: 'danger', text: `В кладовой ${expired.length} просроченных: ${expired.slice(0,3).map(i => i.name).join(', ')}${expired.length > 3 ? '...' : ''}` });
+            } else if (expiring.length > 0) {
+                insights.push({ icon: '⏰', type: 'warning', text: `${expiring.length} продукт(ов) истекает через 3 дня: ${expiring.map(i => i.name).join(', ')}.` });
+            }
+
+            const debts = await DB.getDebts();
+            const totalDebt = debts.reduce((s, d) => s + (d.amount - (d.paid || 0)), 0);
+            if (totalDebt > 0) {
+                insights.push({ icon: '💳', type: 'warning', text: `Остаток по долгам: ${formatMoney(totalDebt)}. Каждый лишний платёж сокращает переплату.` });
+            } else if (debts.length > 0) {
+                insights.push({ icon: '🎉', type: 'success', text: `Все долги погашены — отличный результат!` });
+            }
+
+            const assets = await InvestmentStorage.getAssets();
+            if (assets.length > 0) {
+                const totalValue = assets.reduce((s, a) => s + a.quantity * (a.currentPrice || a.buyPrice || 0), 0);
+                const totalCost = assets.reduce((s, a) => s + a.quantity * a.buyPrice, 0);
+                const profit = totalValue - totalCost;
+                if (totalCost > 0) {
+                    const yieldPct = (profit / totalCost) * 100;
+                    if (yieldPct > 0) {
+                        insights.push({ icon: '📈', type: 'success', text: `Инвестиционный портфель: +${yieldPct.toFixed(1)}% (${formatMoney(profit)}). Продолжай в том же духе.` });
+                    } else {
+                        insights.push({ icon: '📉', type: 'warning', text: `Портфель в минусе на ${Math.abs(yieldPct).toFixed(1)}%. Долгосрочно рынок растёт — не паникуй.` });
+                    }
+                }
+            }
+
+            const subs = await DB.getSubscriptions();
+            const soonSubs = subs.filter(s => {
+                const d = new Date(s.nextDate);
+                const diff = (d - todayDate) / (1000 * 60 * 60 * 24);
+                return diff >= 0 && diff <= 5;
+            });
+            if (soonSubs.length > 0) {
+                insights.push({ icon: '🔔', type: 'warning', text: `Скоро спишутся подписки: ${soonSubs.map(s => `${s.name} (${formatMoney(s.amount)})`).join(', ')}.` });
+            }
+
+            const priority = { danger: 0, warning: 1, success: 2, '': 3 };
+            insights.sort((a, b) => (priority[a.type || ''] || 3) - (priority[b.type || ''] || 3));
+            return insights.slice(0, 5);
+        }
+
+        async function buildQuickActions() {
+            const actions = [];
+            const txs = await DB.getTransactions();
+            const settings = await DB.getSettings();
+            const period = getCurrentPeriod(settings.monthStartDay || 1);
+            const periodTxs = txs.filter(t => { const d = new Date(t.date); return d >= period.start && d <= period.end; });
+
+            actions.push({ icon: '📊', label: 'Разбор текущего месяца', query: 'разбор месяца' });
+            actions.push({ icon: '📈', label: 'Прогноз до конца месяца', query: 'прогноз' });
+            actions.push({ icon: '🔥', label: 'Топ-5 крупнейших трат', query: 'топ трат' });
+
+            const debts = await DB.getDebts();
+            const totalDebt = debts.reduce((s, d) => s + (d.amount - (d.paid || 0)), 0);
+            if (totalDebt > 0) {
+                actions.push({ icon: '💳', label: 'Как быстрее погасить долги?', query: 'долги' });
+            }
+
+            const habitSum = periodTxs.filter(t => t.category === 'BADHABIT').reduce((s, t) => s + t.amount, 0);
+            if (habitSum > 0) {
+                actions.push({ icon: '🚬', label: 'Анализ вредных привычек', query: 'привычки' });
+            }
+
+            const budgets = await DB.getBudgets();
+            const catSpend = {};
+            periodTxs.filter(t => t.type === 'EXPENSE').forEach(t => {
+                catSpend[t.category] = (catSpend[t.category] || 0) + t.amount;
+            });
+            const overBudget = Object.keys(budgets).filter(cat => budgets[cat] > 0 && (catSpend[cat] || 0) > budgets[cat]);
+            if (overBudget.length > 0) {
+                actions.push({ icon: '⚠️', label: 'Где я перерасходую?', query: 'перерасход' });
+            }
+
+            const assets = await InvestmentStorage.getAssets();
+            if (assets.length > 0) {
+                actions.push({ icon: '📈', label: 'Анализ портфеля', query: 'инвестиции' });
+            }
+
+            actions.push({ icon: '🎯', label: 'Как накопить на цель?', query: 'накопления' });
+
+            const totalIncome = periodTxs.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+            if (totalIncome > 0) {
+                actions.push({ icon: '💡', label: 'Как сэкономить 10%?', query: 'экономия' });
+            }
+
+            return actions.slice(0, 6);
+        }
+
+        // ============================================================
+        // ПРОВЕРКА СРОКОВ ГОДНОСТИ
+        // ============================================================
+        async function checkExpiryDates() {
+            const pantry = await DB.getPantry();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const threeDaysLater = new Date(today);
+            threeDaysLater.setDate(today.getDate() + 3);
+            const expired = [];
+            const expiringSoon = [];
+            for (const item of pantry) {
+                if (!item.expiry) continue;
+                const expiryDate = new Date(item.expiry);
+                expiryDate.setHours(0, 0, 0, 0);
+                if (expiryDate < today) {
+                    expired.push(item);
+                } else if (expiryDate <= threeDaysLater) {
+                    expiringSoon.push(item);
+                }
+            }
+            if (expired.length > 0) {
+                NotificationService.error(`⚠️ Просрочено ${expired.length}: ${expired.map(i => i.name).join(', ')}`);
+                sendNotification('⚠️ Просроченные продукты', expired.map(i => i.name).join(', '));
+            }
+            if (expiringSoon.length > 0) {
+                NotificationService.warning(`⏰ Скоро истекает у ${expiringSoon.length}: ${expiringSoon.map(i => i.name).join(', ')}`);
+                sendNotification('⏰ Срок годности истекает', expiringSoon.map(i => i.name).join(', '));
+            }
+        }
+
+        async function setExpiryDate(productId) {
+            const pantry = await DB.getPantry();
+            const item = pantry.find(p => p.id === productId);
+            if (!item) { NotificationService.error('Продукт не найден'); return; }
+            const overlay = document.getElementById('modal-generic');
+            const content = document.getElementById('modalContent');
+            if (!overlay || !content) return;
+            content.innerHTML = `
+                <h3 class="title">📅 Указать срок годности</h3>
+                <form id="setExpiryForm">
+                    <div class="input-group">
+                        <label>Продукт</label>
+                        <input type="text" value="${item.name}" disabled style="opacity:0.7;">
+                    </div>
+                    <div class="input-group">
+                        <label>Срок годности</label>
+                        <input type="date" id="expiryDateInput" value="${item.expiry || ''}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full">Сохранить</button>
+                </form>
+            `;
+            overlay.classList.add('active');
+            document.getElementById('setExpiryForm').onsubmit = async function(e) {
+                e.preventDefault();
+                const newExpiry = document.getElementById('expiryDateInput').value;
+                if (!newExpiry) { NotificationService.error('Выберите дату'); return; }
+                const idx = pantry.findIndex(p => p.id === productId);
+                if (idx !== -1) {
+                    pantry[idx].expiry = newExpiry;
+                    await DB.setPantry(pantry);
+                    closeModal();
                     await renderAll();
-                } catch (err) {
-                    NotificationService.error('❌ Ошибка импорта: неверный файл');
-                    console.error(err);
+                    NotificationService.success('✅ Срок обновлён');
                 }
             };
-            reader.readAsText(file);
-        };
-        input.click();
-    }
-
-    // ============================================================
-    // УВЕДОМЛЕНИЯ СИСТЕМЫ
-    // ============================================================
-    function requestNotificationPermission() {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-    }
-
-    function sendNotification(title, body) {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            try {
-                new Notification(title, { body, icon: '📊' });
-            } catch (e) {
-                console.warn('Не удалось отправить уведомление:', e);
-            }
-        }
-    }
-
-    // ---------- СОВЕТЫ ДНЯ ----------
-    const TIPS_OF_DAY = [
-        "Начните откладывать 10% от каждого дохода — это изменит вашу жизнь через год.",
-        "Проверьте подписки: возможно, вы платите за то, чем не пользуетесь.",
-        "Сравните цены в 3 магазинах перед крупной покупкой — экономия до 30%.",
-        "Поставьте финансовую цель на месяц и отслеживайте прогресс каждый день.",
-        "Инвестируйте в себя — книги, курсы, здоровье окупаются быстрее акций.",
-        "Создайте подушку безопасности — 3–6 месячных расходов.",
-        "Используйте кэшбэк-сервисы и карты с возвратом процентов.",
-        "Планируйте покупки заранее — импульсивные траты съедают бюджет.",
-        "Откажитесь от одной вредной привычки и направьте сэкономленное на инвестиции.",
-        "Каждый месяц пересматривайте бюджет — корректируйте, если что-то пошло не так.",
-        "Не берите кредиты на вещи, которые теряют в цене.",
-        "Диверсифицируйте инвестиции — не кладите все яйца в одну корзину.",
-        "Изучайте финансовую грамотность — знание сила.",
-        "Ставьте реалистичные финансовые цели и разбивайте их на шаги.",
-        "Автоматизируйте сбережения — переводите деньги на накопительный счёт в день зарплаты.",
-        "Следите за инфляцией — деньги должны работать, а не лежать под подушкой.",
-        "Обсуждайте финансы с семьёй — общие цели легче достигаются.",
-        "Периодически пересматривайте свои страховки — возможно, вы переплачиваете.",
-        "Используйте налоговые вычеты — это законный способ вернуть часть налогов.",
-        "Не бойтесь просить скидку — часто её можно получить.",
-        "Ведите учёт всех расходов — это помогает видеть картину целиком.",
-        "Создайте фонд на крупные покупки — не берите кредиты на всё подряд.",
-        "Изучите возможности пассивного дохода — дивиденды, аренда, проценты.",
-        "Помните: богатство — это не доход, а накопления и правильное управление.",
-        "Регулярно анализируйте свой инвестиционный портфель.",
-        "Не поддавайтесь панике на рынках — долгосрочные инвестиции выигрывают.",
-        "Начните с малого — даже 500 рублей в месяц вложения изменят будущее.",
-        "Определите свои финансовые ценности — на что вы тратите с удовольствием?",
-        "Используйте приложения для учёта финансов — это дисциплинирует.",
-        "Не сравнивайте свой путь с другими — у каждого свои возможности и цели.",
-        "Помните, что богатство — это состояние ума, а не кошелька.",
-        "Каждый день делайте хотя бы одно действие, приближающее вас к финансовой свободе.",
-        "Пересмотрите свои расходы на развлечения — возможно, есть бесплатные альтернативы.",
-        "Научитесь говорить 'нет' ненужным тратам.",
-        "Создайте систему мотивации — например, награждайте себя за экономию.",
-        "Помните о законе Парето: 20% усилий дают 80% результата.",
-        "Изучайте опыт успешных инвесторов, но не копируйте слепо.",
-        "Инвестируйте в то, что понимаете.",
-        "Не бойтесь ошибок — они учат лучше, чем успех.",
-        "Регулярно проверяйте кредитную историю.",
-        "Пользуйтесь бесплатными банковскими услугами — не переплачивайте.",
-        "Создайте финансовый дневник и записывайте свои мысли о деньгах.",
-        "Помните: время на вашей стороне — начните инвестировать сегодня.",
-        "Не вкладывайте деньги в сомнительные проекты — лучше изучите тему.",
-        "Ставьте финансовые цели на год, 5 лет, 10 лет.",
-        "Обсуждайте финансы с друзьями — это укрепляет финансовую культуру.",
-        "Используйте правило 50/30/20 для бюджета.",
-        "Помните, что финансовая независимость — это марафон, а не спринт."
-    ];
-
-    function getTipOfDay() {
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
-        const index = dayOfYear % TIPS_OF_DAY.length;
-        return TIPS_OF_DAY[index];
-    }
-
-    // ---------- МАНТРЫ ----------
-    const MANTRAS = [
-        "Я управляю своими деньгами, а не они мной.",
-        "Каждая копейка приближает меня к свободе.",
-        "Я выбираю тратить с умом и радоваться жизни.",
-        "Мои финансовые решения — это инвестиции в моё будущее.",
-        "Я знаю, куда идут мои деньги, и это даёт мне силу.",
-        "Богатство начинается с правильного мышления.",
-        "Я способен накапливать и приумножать.",
-        "Мои доходы растут, потому что я верю в себя.",
-        "Каждый день я становлюсь финансово грамотнее.",
-        "Я планирую, действую и достигаю целей.",
-        "Финансовая свобода — это результат моих ежедневных усилий.",
-        "Я достоин финансового изобилия.",
-        "Деньги — это инструмент для жизни, которую я выбираю.",
-        "Я благодарен за каждый рубль, который приходит в мою жизнь.",
-        "Мои инвестиции работают на меня.",
-        "Я создаю богатство с любовью и уважением к деньгам.",
-        "Каждая трата — это выбор, и я делаю осознанный выбор.",
-        "Я умею говорить 'нет' импульсивным покупкам.",
-        "Мой бюджет — это план моего успеха.",
-        "Я спокоен и уверен в своём финансовом будущем.",
-        "Я привлекаю деньги легко и с радостью.",
-        "Мои финансовые цели ясны, и я иду к ним.",
-        "Я умею зарабатывать и сохранять.",
-        "Деньги приходят ко мне всё более щедрым потоком.",
-        "Я живу в изобилии, и деньги — лишь его часть.",
-        "Каждый день я улучшаю свои финансовые привычки.",
-        "Я достоин больших доходов и с радостью их принимаю.",
-        "Мои деньги работают на мои мечты.",
-        "Я благодарен за свой доход и умею его приумножать.",
-        "Финансовая грамотность — мой суперсила.",
-        "Я в гармонии с деньгами.",
-        "Мои накопления растут с каждым месяцем.",
-        "Я наслаждаюсь процессом создания богатства.",
-        "Мой финансовый план работает, и я верю в него.",
-        "Я принимаю правильные финансовые решения каждый день.",
-        "Деньги — это энергия, и я направляю её в нужное русло.",
-        "Я создаю пассивный доход, и он растёт.",
-        "Мои инвестиции приносят плоды.",
-        "Я умею ждать и видеть долгосрочную выгоду.",
-        "Моя жизнь становится лучше с каждым финансовым шагом.",
-        "Я благодарен за финансовые уроки, которые получаю.",
-        "Я смело иду к своим финансовым целям.",
-        "Моё финансовое будущее светлое и стабильное.",
-        "Я ценю деньги и правильно ими распоряжаюсь.",
-        "Я всегда нахожу возможности для роста доходов.",
-        "Мои расходы контролируемы и разумны.",
-        "Я строю капитал с умом и терпением.",
-        "Деньги не главное, но с ними я чувствую себя свободнее.",
-        "Я привлекаю финансовые возможности.",
-        "Каждый день я становлюсь ближе к финансовой независимости.",
-        "Я умею радоваться жизни, не тратя лишнего.",
-        "Мои финансовые привычки — основа моего успеха.",
-        "Я знаю, что могу достичь любых целей, если планирую бюджет.",
-        "Деньги — это не цель, а средство для жизни моей мечты.",
-        "Я в ответе за свои финансы и горжусь этим.",
-        "Мои инвестиции — это мой вклад в будущее.",
-        "Я умею копить и радоваться накоплениям.",
-        "Каждый месяц я становлюсь богаче и мудрее.",
-        "Я достоин финансового изобилия и принимаю его.",
-        "Мои доходы превышают расходы, и я расту.",
-        "Я наслаждаюсь процессом управления деньгами.",
-        "Финансовая грамотность открывает передо мной двери.",
-        "Я благодарен за все возможности, которые дают мне деньги.",
-        "Я инвестирую в себя и своё будущее каждый день.",
-        "Мои финансовые цели вдохновляют меня.",
-        "Я умею откладывать деньги и не чувствовать дискомфорта.",
-        "Деньги приходят ко мне легко и естественно.",
-        "Я управляю своим бюджетом с лёгкостью.",
-        "Мои накопления дают мне чувство безопасности.",
-        "Я создаю богатство с радостью и благодарностью.",
-        "Каждая моя покупка — это осознанный выбор.",
-        "Я умею наслаждаться жизнью, не нарушая бюджет.",
-        "Моя финансовая дисциплина делает меня сильнее.",
-        "Я горжусь своими финансовыми достижениями.",
-        "Деньги — это инструмент, а не хозяин моей жизни.",
-        "Я каждый день делаю шаг к финансовой свободе.",
-        "Мои инвестиции работают, даже когда я сплю.",
-        "Я умею создавать денежный поток.",
-        "Благосостояние — это результат моих привычек.",
-        "Я достоин жить в достатке и уверенности.",
-        "Мои финансовые цели достижимы, и я доказываю это.",
-        "Я умею управлять рисками и инвестировать с умом.",
-        "Каждый день я благодарю деньги за возможности, которые они дают."
-    ];
-
-    function getMantraOfDay() {
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
-        const index = dayOfYear % MANTRAS.length;
-        return MANTRAS[index];
-    }
-
-    function sendDailyTip() {
-        const tip = getTipOfDay();
-        sendNotification('💡 Совет дня по финансам', tip);
-    }
-
-    function scheduleDailyTips() {
-        const now = new Date();
-        const times = [{ h: 9, m: 0 }, { h: 14, m: 0 }, { h: 19, m: 0 }];
-        times.forEach(({ h, m }) => {
-            const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
-            if (target <= now) target.setDate(target.getDate() + 1);
-            const delay = target - now;
-            setTimeout(() => {
-                sendDailyTip();
-                setInterval(sendDailyTip, 86400000);
-            }, delay);
-        });
-    }
-
-    // ============================================================
-    // ДЕБАУНС
-    // ============================================================
-    function debounce(fn, delay) {
-        let timer;
-        return function(...args) {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn.apply(this, args), delay);
-        };
-    }
-
-    // ---------- ПАГИНАЦИЯ ----------
-    let currentPage = 1;
-    const pageSize = 20;
-
-    // ============================================================
-    // ЦВЕТА МАГАЗИНОВ
-    // ============================================================
-    const SHOP_COLORS = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9',
-        '#FDCB6E', '#E17055', '#00B894', '#6C5CE7', '#F8A5C2',
-        '#74B9FF', '#55EFC4', '#FAB1A0', '#81ECEC', '#D6A2E8'
-    ];
-
-    async function getShopColor(shopName, shops = null) {
-        if (!shopName) return '#6C7A8D';
-        if (!shops) {
-            shops = await DB.getShops();
-        }
-        const shop = shops.find(s => s.name.toLowerCase() === shopName.toLowerCase());
-        if (shop && shop.color) {
-            return shop.color;
-        }
-        const existingColors = shops.map(s => s.color).filter(c => c);
-        const availableColors = SHOP_COLORS.filter(c => !existingColors.includes(c));
-        const color = availableColors.length > 0
-            ? availableColors[0]
-            : SHOP_COLORS[Math.floor(Math.random() * SHOP_COLORS.length)];
-        if (shop) {
-            shop.color = color;
-            await DB.setShops(shops);
-        }
-        return color;
-    }
-
-    // ОПТИМИЗАЦИЯ: одна загрузка вместо цикла
-    async function getColorsForGoods(goodNames) {
-        const purchases = await DB.getPurchaseItems();
-        const shops = await DB.getShops();
-        const shopMap = {};
-        shops.forEach(s => { shopMap[s.name.toLowerCase()] = s.color || '#6C7A8D'; });
-
-        // Строим индекс последних покупок за один проход
-        const lastPurchaseMap = {};
-        for (const p of purchases) {
-            const key = p.name.toLowerCase().trim();
-            const existing = lastPurchaseMap[key];
-            if (!existing || new Date(p.date) > new Date(existing.date)) {
-                lastPurchaseMap[key] = p;
-            }
         }
 
-        const result = {};
-        for (const name of goodNames) {
-            const key = name.toLowerCase().trim();
-            const last = lastPurchaseMap[key];
-            result[name] = (last && last.store && shopMap[last.store.toLowerCase()])
-                ? shopMap[last.store.toLowerCase()]
-                : '#6C7A8D';
-        }
-        return result;
-    }
-
-    async function getColorForGood(goodName) {
-        const map = await getColorsForGoods([goodName]);
-        return map[goodName] || '#6C7A8D';
-    }
-
-    async function refreshShopDatalist() {
-        const shops = await DB.getShops();
-        const datalist = document.getElementById('shopList');
-        if (datalist) {
-            datalist.innerHTML = shops.map(s => `<option value="${s.name}">`).join('');
-        }
-    }
-
-    // ============================================================
-    // АНАЛИЗ ТОВАРОВ
-    // ============================================================
-    async function analyzeGoods(year, month) {
-        const purchases = await DB.getPurchaseItems();
-        const start = new Date(year, month - 1, 1);
-        const end = new Date(year, month, 1);
-        const prevStart = new Date(year, month - 2, 1);
-        const prevEnd = new Date(year, month - 1, 1);
-
-        const currentPurchases = purchases.filter(p => {
-            const d = new Date(p.date);
-            return d >= start && d < end;
-        });
-        const prevPurchases = purchases.filter(p => {
-            const d = new Date(p.date);
-            return d >= prevStart && d < prevEnd;
-        });
-
-        const currentMap = {};
-        currentPurchases.forEach(p => {
-            const key = p.name.toLowerCase().trim();
-            if (!currentMap[key]) currentMap[key] = { prices: [], names: [] };
-            currentMap[key].prices.push(p.price);
-            currentMap[key].names.push(p.name);
-        });
-        const prevMap = {};
-        prevPurchases.forEach(p => {
-            const key = p.name.toLowerCase().trim();
-            if (!prevMap[key]) prevMap[key] = { prices: [], names: [] };
-            prevMap[key].prices.push(p.price);
-            prevMap[key].names.push(p.name);
-        });
-
-        const goods = [];
-        const allKeys = new Set([...Object.keys(currentMap), ...Object.keys(prevMap)]);
-        for (const key of allKeys) {
-            const current = currentMap[key];
-            const prev = prevMap[key];
-            const avgCurrent = current ? current.prices.reduce((a, b) => a + b, 0) / current.prices.length : null;
-            const avgPrev = prev ? prev.prices.reduce((a, b) => a + b, 0) / prev.prices.length : null;
-            const countCurrent = current ? current.prices.length : 0;
-            const countPrev = prev ? prev.prices.length : 0;
-            const name = current ? current.names[0] : (prev ? prev.names[0] : key);
-            goods.push({
-                name,
-                key,
-                avgCurrent,
-                avgPrev,
-                countCurrent,
-                countPrev,
-                change: (avgCurrent !== null && avgPrev !== null && avgPrev > 0)
-                    ? ((avgCurrent - avgPrev) / avgPrev * 100)
-                    : null
-            });
-        }
-
-        const basketGoods = goods.filter(g => g.countCurrent + g.countPrev >= 2);
-        let inflation = null;
-        if (basketGoods.length > 0) {
-            const totalCurrent = basketGoods.reduce((sum, g) => sum + (g.avgCurrent || 0), 0);
-            const totalPrev = basketGoods.reduce((sum, g) => sum + (g.avgPrev || 0), 0);
-            if (totalPrev > 0) {
-                inflation = ((totalCurrent - totalPrev) / totalPrev) * 100;
-            }
-        }
-
-        const withChange = goods.filter(g => g.change !== null && g.countCurrent > 0 && g.countPrev > 0);
-        const sortedByChange = [...withChange].sort((a, b) => b.change - a.change);
-        const topRisers = sortedByChange.slice(0, 5);
-        const topFallers = sortedByChange.slice(-5).reverse();
-
-        const tips = [];
-        topRisers.forEach(g => {
-            if (g.change > 10) {
-                tips.push(`📈 ${g.name}: цена выросла на ${g.change.toFixed(1)}% за месяц. Поищите аналоги в других магазинах.`);
-            }
-        });
-        topFallers.forEach(g => {
-            if (g.change < -5) {
-                tips.push(`📉 ${g.name}: цена снизилась на ${Math.abs(g.change).toFixed(1)}%. Выгодно закупиться сейчас.`);
-            }
-        });
-
-        const popularGoods = goods.filter(g => g.countCurrent + g.countPrev >= 3).slice(0, 6);
-        const sixMonthsData = [];
-        for (let i = 0; i < 6; i++) {
-            const d = new Date(year, month - 1 - i, 1);
-            const y = d.getFullYear();
-            const m = d.getMonth() + 1;
-            const startM = new Date(y, m - 1, 1);
-            const endM = new Date(y, m, 1);
-            const monthPurchases = purchases.filter(p => {
-                const pd = new Date(p.date);
-                return pd >= startM && pd < endM;
-            });
-            const monthMap = {};
-            monthPurchases.forEach(p => {
-                const key = p.name.toLowerCase().trim();
-                if (!monthMap[key]) monthMap[key] = [];
-                monthMap[key].push(p.price);
-            });
-            const monthAvg = {};
-            for (const key of Object.keys(monthMap)) {
-                monthAvg[key] = monthMap[key].reduce((a, b) => a + b, 0) / monthMap[key].length;
-            }
-            sixMonthsData.push({
-                label: `${m}/${y}`,
-                goods: popularGoods.map(g => ({
-                    name: g.name,
-                    price: monthAvg[g.key] || null
-                }))
-            });
-        }
-
-        return {
-            goods,
-            basketGoods,
-            inflation,
-            topRisers,
-            topFallers,
-            tips,
-            sixMonthsData,
-            popularGoods
-        };
-    }
-
-    // ============================================================
-    // ИНСАЙТЫ И БЫСТРЫЕ ДЕЙСТВИЯ
-    // ============================================================
-    async function generateInsights() {
-        const insights = [];
-        const settings = await DB.getSettings();
-        const period = getCurrentPeriod(settings.monthStartDay || 1);
-        const txs = await DB.getTransactions();
-        const periodTxs = txs.filter(t => { const d = new Date(t.date); return d >= period.start && d <= period.end; });
-
-        const totalExpense = periodTxs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
-        const totalIncome = periodTxs.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
-        const balance = totalIncome - totalExpense;
-
-        const prevStart = new Date(period.start);
-        prevStart.setMonth(prevStart.getMonth() - 1);
-        const prevEnd = new Date(period.end);
-        prevEnd.setMonth(prevEnd.getMonth() - 1);
-        const prevTxs = txs.filter(t => { const d = new Date(t.date); return d >= prevStart && d <= prevEnd; });
-        const prevExpense = prevTxs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
-        if (prevExpense > 0) {
-            const change = ((totalExpense - prevExpense) / prevExpense) * 100;
-            if (change > 20) {
-                insights.push({ icon: '📈', type: 'danger', text: `Расходы выросли на ${change.toFixed(0)}% по сравнению с прошлым периодом. Стоит проверить, где именно перерасход.` });
-            } else if (change < -10) {
-                insights.push({ icon: '📉', type: 'success', text: `Ты сократил расходы на ${Math.abs(change).toFixed(0)}% — так держать! Экономия составляет примерно ${formatMoney(prevExpense - totalExpense)}.` });
-            }
-        }
-
-        const catSpend = {};
-        periodTxs.filter(t => t.type === 'EXPENSE').forEach(t => {
-            catSpend[t.category] = (catSpend[t.category] || 0) + t.amount;
-        });
-        const topCat = Object.entries(catSpend).sort((a, b) => b[1] - a[1])[0];
-        if (topCat && totalExpense > 0) {
-            const pct = ((topCat[1] / totalExpense) * 100).toFixed(0);
-            if (pct > 40) {
-                insights.push({ icon: '🔥', type: 'warning', text: `${CATEGORY_NAMES[topCat[0]]} — ${pct}% всех расходов (${formatMoney(topCat[1])}). Попробуй установить бюджет на эту категорию.` });
-            } else {
-                insights.push({ icon: '📊', text: `Крупнейшая категория — ${CATEGORY_NAMES[topCat[0]]}: ${formatMoney(topCat[1])} (${pct}% от всех расходов).` });
-            }
-        }
-
-        const today = new Date();
-        const daysInPeriod = Math.ceil((period.end - period.start) / (1000 * 60 * 60 * 24));
-        const daysPassed = Math.max(1, Math.ceil((today - period.start) / (1000 * 60 * 60 * 24)));
-        if (daysPassed > 3 && daysInPeriod > 0) {
-            const dailyRate = totalExpense / daysPassed;
-            const forecast = totalIncome - (dailyRate * daysInPeriod);
-            if (forecast < 0) {
-                insights.push({ icon: '⚠️', type: 'danger', text: `При текущем темпе к концу периода расходы превысят доходы на ${formatMoney(Math.abs(forecast))}.` });
-            } else if (forecast > 0 && totalIncome > 0) {
-                insights.push({ icon: '💰', type: 'success', text: `Прогноз на конец периода: сможешь отложить около ${formatMoney(forecast)}, если сохранишь текущий темп.` });
-            }
-        }
-
-        const pantry = await DB.getPantry();
-        const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
-        const expired = pantry.filter(i => i.expiry && new Date(i.expiry) < todayDate);
-        const expiring = pantry.filter(i => {
-            if (!i.expiry) return false;
-            const ed = new Date(i.expiry); ed.setHours(0,0,0,0);
-            const threeDays = new Date(todayDate); threeDays.setDate(threeDays.getDate() + 3);
-            return ed >= todayDate && ed <= threeDays;
-        });
-        if (expired.length > 0) {
-            insights.push({ icon: '🚨', type: 'danger', text: `В кладовой ${expired.length} просроченных: ${expired.slice(0,3).map(i => i.name).join(', ')}${expired.length > 3 ? '...' : ''}` });
-        } else if (expiring.length > 0) {
-            insights.push({ icon: '⏰', type: 'warning', text: `${expiring.length} продукт(ов) истекает через 3 дня: ${expiring.map(i => i.name).join(', ')}.` });
-        }
-
-        const debts = await DB.getDebts();
-        const totalDebt = debts.reduce((s, d) => s + (d.amount - (d.paid || 0)), 0);
-        if (totalDebt > 0) {
-            insights.push({ icon: '💳', type: 'warning', text: `Остаток по долгам: ${formatMoney(totalDebt)}. Каждый лишний платёж сокращает переплату.` });
-        } else if (debts.length > 0) {
-            insights.push({ icon: '🎉', type: 'success', text: `Все долги погашены — отличный результат!` });
-        }
-
-        const assets = await InvestmentStorage.getAssets();
-        if (assets.length > 0) {
-            const totalValue = assets.reduce((s, a) => s + a.quantity * (a.currentPrice || a.buyPrice || 0), 0);
-            const totalCost = assets.reduce((s, a) => s + a.quantity * a.buyPrice, 0);
-            const profit = totalValue - totalCost;
-            if (totalCost > 0) {
-                const yieldPct = (profit / totalCost) * 100;
-                if (yieldPct > 0) {
-                    insights.push({ icon: '📈', type: 'success', text: `Инвестиционный портфель: +${yieldPct.toFixed(1)}% (${formatMoney(profit)}). Продолжай в том же духе.` });
-                } else {
-                    insights.push({ icon: '📉', type: 'warning', text: `Портфель в минусе на ${Math.abs(yieldPct).toFixed(1)}%. Долгосрочно рынок растёт — не паникуй.` });
-                }
-            }
-        }
-
-        const subs = await DB.getSubscriptions();
-        const soonSubs = subs.filter(s => {
-            const d = new Date(s.nextDate);
-            const diff = (d - todayDate) / (1000 * 60 * 60 * 24);
-            return diff >= 0 && diff <= 5;
-        });
-        if (soonSubs.length > 0) {
-            insights.push({ icon: '🔔', type: 'warning', text: `Скоро спишутся подписки: ${soonSubs.map(s => `${s.name} (${formatMoney(s.amount)})`).join(', ')}.` });
-        }
-
-        const priority = { danger: 0, warning: 1, success: 2, '': 3 };
-        insights.sort((a, b) => (priority[a.type || ''] || 3) - (priority[b.type || ''] || 3));
-        return insights.slice(0, 5);
-    }
-
-    async function buildQuickActions() {
-        const actions = [];
-        const txs = await DB.getTransactions();
-        const settings = await DB.getSettings();
-        const period = getCurrentPeriod(settings.monthStartDay || 1);
-        const periodTxs = txs.filter(t => { const d = new Date(t.date); return d >= period.start && d <= period.end; });
-
-        actions.push({ icon: '📊', label: 'Разбор текущего месяца', query: 'разбор месяца' });
-        actions.push({ icon: '📈', label: 'Прогноз до конца месяца', query: 'прогноз' });
-        actions.push({ icon: '🔥', label: 'Топ-5 крупнейших трат', query: 'топ трат' });
-
-        const debts = await DB.getDebts();
-        const totalDebt = debts.reduce((s, d) => s + (d.amount - (d.paid || 0)), 0);
-        if (totalDebt > 0) {
-            actions.push({ icon: '💳', label: 'Как быстрее погасить долги?', query: 'долги' });
-        }
-
-        const habitSum = periodTxs.filter(t => t.category === 'BADHABIT').reduce((s, t) => s + t.amount, 0);
-        if (habitSum > 0) {
-            actions.push({ icon: '🚬', label: 'Анализ вредных привычек', query: 'привычки' });
-        }
-
-        const budgets = await DB.getBudgets();
-        const catSpend = {};
-        periodTxs.filter(t => t.type === 'EXPENSE').forEach(t => {
-            catSpend[t.category] = (catSpend[t.category] || 0) + t.amount;
-        });
-        const overBudget = Object.keys(budgets).filter(cat => budgets[cat] > 0 && (catSpend[cat] || 0) > budgets[cat]);
-        if (overBudget.length > 0) {
-            actions.push({ icon: '⚠️', label: 'Где я перерасходую?', query: 'перерасход' });
-        }
-
-        const assets = await InvestmentStorage.getAssets();
-        if (assets.length > 0) {
-            actions.push({ icon: '📈', label: 'Анализ портфеля', query: 'инвестиции' });
-        }
-
-        actions.push({ icon: '🎯', label: 'Как накопить на цель?', query: 'накопления' });
-
-        const totalIncome = periodTxs.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
-        if (totalIncome > 0) {
-            actions.push({ icon: '💡', label: 'Как сэкономить 10%?', query: 'экономия' });
-        }
-
-        return actions.slice(0, 6);
-    }
-
-    // ============================================================
-    // ПРОВЕРКА СРОКОВ ГОДНОСТИ
-    // ============================================================
-    async function checkExpiryDates() {
-        const pantry = await DB.getPantry();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const threeDaysLater = new Date(today);
-        threeDaysLater.setDate(today.getDate() + 3);
-        const expired = [];
-        const expiringSoon = [];
-        for (const item of pantry) {
-            if (!item.expiry) continue;
-            const expiryDate = new Date(item.expiry);
-            expiryDate.setHours(0, 0, 0, 0);
-            if (expiryDate < today) {
-                expired.push(item);
-            } else if (expiryDate <= threeDaysLater) {
-                expiringSoon.push(item);
-            }
-        }
-        if (expired.length > 0) {
-            NotificationService.error(`⚠️ Просрочено ${expired.length}: ${expired.map(i => i.name).join(', ')}`);
-            sendNotification('⚠️ Просроченные продукты', expired.map(i => i.name).join(', '));
-        }
-        if (expiringSoon.length > 0) {
-            NotificationService.warning(`⏰ Скоро истекает у ${expiringSoon.length}: ${expiringSoon.map(i => i.name).join(', ')}`);
-            sendNotification('⏰ Срок годности истекает', expiringSoon.map(i => i.name).join(', '));
-        }
-    }
-
-    async function setExpiryDate(productId) {
-        const pantry = await DB.getPantry();
-        const item = pantry.find(p => p.id === productId);
-        if (!item) { NotificationService.error('Продукт не найден'); return; }
-        const overlay = document.getElementById('modal-generic');
-        const content = document.getElementById('modalContent');
-        if (!overlay || !content) return;
-        content.innerHTML = `
-            <h3 class="title">📅 Указать срок годности</h3>
-            <form id="setExpiryForm">
-                <div class="input-group">
-                    <label>Продукт</label>
-                    <input type="text" value="${item.name}" disabled style="opacity:0.7;">
-                </div>
-                <div class="input-group">
-                    <label>Срок годности</label>
-                    <input type="date" id="expiryDateInput" value="${item.expiry || ''}" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-full">Сохранить</button>
-            </form>
-        `;
-        overlay.classList.add('active');
-        document.getElementById('setExpiryForm').onsubmit = async function(e) {
-            e.preventDefault();
-            const newExpiry = document.getElementById('expiryDateInput').value;
-            if (!newExpiry) { NotificationService.error('Выберите дату'); return; }
-            const idx = pantry.findIndex(p => p.id === productId);
-            if (idx !== -1) {
-                pantry[idx].expiry = newExpiry;
-                await DB.setPantry(pantry);
-                closeModal();
-                await renderAll();
-                NotificationService.success('✅ Срок обновлён');
-            }
-        };
-    }
-
-    console.log('✅ FinanceOS — Часть 2 (сервисы, хранилище, кэш, темы/лейауты/модули) загружена!');
-</script>
-<script>
+        console.log('✅ FinanceOS — Часть 3 (сервисы, хранилище, кэш, темы/лейауты/модули) загружена!');
+    </script>
+    <script>
     // ================================================================
-    // ЧАСТЬ 3: РЕНДЕРЫ (ГЛАВНАЯ, ФИНАНСЫ, КЛАДОВАЯ, АВТО, ЖКХ,
-    // ПОДПИСКИ, ДОЛГИ, ЗАДАЧИ, ЗАМЕТКИ, ДАТЫ)
+    // ЧАСТЬ 4: РЕНДЕРЫ СТРАНИЦ (первая половина)
     // ================================================================
 
     // ============================================================
-    // ГЛАВНАЯ (с исправленным именем из settings.name)
+    // ГЛАВНАЯ
     // ============================================================
     async function renderDashboard(container) {
         const settings = await DB.getSettings();
@@ -2766,7 +2795,6 @@
             return d >= period.start && d <= period.end;
         });
 
-        // ✅ ИСПРАВЛЕНИЕ: имя берём из settings (там его сохраняет форма), fallback на user
         const userStored = await DB.getUser();
         const user = { ...userStored, name: settings.name || userStored.name || 'Пользователь' };
 
@@ -2777,7 +2805,6 @@
         const shoppingList = await DB.getShoppingList();
         const mantra = getMantraOfDay();
 
-        // График за 7 дней
         const last7 = [];
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
@@ -2792,7 +2819,6 @@
             last7.push({ date: key, balance: dayIncome - dayExpense });
         }
 
-        // Оптимизировано: цвета магазинов ОДНИМ вызовом
         const goodNames = shoppingList.map(i => i.name);
         const colorMap = await getColorsForGoods(goodNames);
 
@@ -2810,7 +2836,6 @@
             `;
         }
 
-        // Последние 5 транзакций
         let recentHtml = '';
         const recent = periodTxs.slice(0, 5);
         for (const tx of recent) {
@@ -2917,7 +2942,7 @@
     }
 
     // ============================================================
-    // ФИНАНСЫ
+    // ФИНАНСЫ — С ФИКСОМ ФОКУСА
     // ============================================================
     async function renderFinance(container) {
         const allTxs = await DB.getTransactions();
@@ -3046,18 +3071,22 @@
             </div>
         `;
 
-        // Обработчики фильтров
         const searchInput = document.getElementById('financeSearch');
         const categorySelect = document.getElementById('financeCategory');
         const typeSelect = document.getElementById('financeType');
         const fromInput = document.getElementById('financeDateFrom');
         const toInput = document.getElementById('financeDateTo');
 
+        // FIX: сохраняем фокус и позицию каретки
         if (searchInput) {
             searchInput.addEventListener('input', debounce(function(e) {
                 window._financeSearch = e.target.value;
                 currentPage = 1;
-                renderAll();
+                const pos = e.target.selectionStart;
+                renderAll().then(() => {
+                    const el = document.getElementById('financeSearch');
+                    if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch(_){} }
+                });
             }, 400));
         }
         if (categorySelect) {
@@ -3078,14 +3107,20 @@
             fromInput.addEventListener('change', function(e) {
                 window._financeDateFrom = e.target.value;
                 currentPage = 1;
-                renderAll();
+                renderAll().then(() => {
+                    const el = document.getElementById('financeDateFrom');
+                    if (el) el.focus();
+                });
             });
         }
         if (toInput) {
             toInput.addEventListener('change', function(e) {
                 window._financeDateTo = e.target.value;
                 currentPage = 1;
-                renderAll();
+                renderAll().then(() => {
+                    const el = document.getElementById('financeDateTo');
+                    if (el) el.focus();
+                });
             });
         }
     }
@@ -3630,14 +3665,6 @@
         `;
     }
 
-    console.log('✅ FinanceOS — Часть 3 (рендеры первой половины) загружена!');
-</script>
-<script>
-    // ================================================================
-    // ЧАСТЬ 4: РЕНДЕРЫ (МАГАЗИНЫ, ИИ, ИНВЕСТИЦИИ, ОБРАЗОВАНИЕ,
-    // РЕМОНТ, АНАЛИТИКА, ШАБЛОНЫ, НАСТРОЙКИ, ЕЖЕМЕСЯЧНЫЙ ОТЧЁТ)
-    // ================================================================
-
     // ============================================================
     // МАГАЗИНЫ
     // ============================================================
@@ -3645,7 +3672,6 @@
         const shops = await DB.getShops();
         const txs = await DB.getTransactions();
 
-        // Оптимизация: строим индекс транзакций по магазинам за один проход
         const shopTxsMap = {};
         for (const t of txs) {
             if (!t.shop) continue;
@@ -3780,6 +3806,13 @@
             </div>
         `;
     }
+
+    console.log('✅ FinanceOS — Часть 4 (рендеры первой половины) загружена!');
+</script>
+<script>
+    // ================================================================
+    // ЧАСТЬ 5: РЕНДЕРЫ СТРАНИЦ (вторая половина)
+    // ================================================================
 
     // ============================================================
     // ИНВЕСТИЦИИ
@@ -3961,7 +3994,6 @@
         const expenses = await DB.getEducationExpenses();
         const total = expenses.reduce((s, e) => s + e.amount, 0);
 
-        // Группировка по месяцам
         const monthMap = {};
         expenses.forEach(e => {
             const m = e.date.substring(0, 7);
@@ -4071,7 +4103,6 @@
         const projects = await DB.getRepairProjects();
         const expenses = await DB.getRepairExpenses();
 
-        // Оптимизация: индекс расходов по проектам
         const expensesByProject = {};
         let totalSpent = 0;
         for (const e of expenses) {
@@ -4237,7 +4268,6 @@
         const dailyLabels = Object.keys(dailyData).sort();
         const dailyValues = dailyLabels.map(d => dailyData[d]);
 
-        // Бюджеты
         let budgetHtml = '';
         for (const cat of allCategories) {
             const spent = categorySpend[cat] || 0;
@@ -4600,7 +4630,7 @@
     }
 
     // ============================================================
-    // ЕЖЕМЕСЯЧНЫЙ ОТЧЁТ + ТОВАРНАЯ АНАЛИТИКА
+    // ТОВАРНАЯ АНАЛИТИКА
     // ============================================================
     async function renderGoodsAnalytics(container, year, month) {
         const data = await analyzeGoods(year, month);
@@ -4739,6 +4769,9 @@
         }
     }
 
+    // ============================================================
+    // ЕЖЕМЕСЯЧНЫЙ ОТЧЁТ
+    // ============================================================
     async function renderMonthlyReport(container) {
         const now = new Date();
         let selectedYear = window._reportYear || now.getFullYear();
@@ -4911,11 +4944,11 @@
         }
     }
 
-    console.log('✅ FinanceOS — Часть 4 (рендеры второй половины) загружена!');
+    console.log('✅ FinanceOS — Часть 5 (рендеры второй половины) загружена!');
 </script>
 <script>
     // ================================================================
-    // ЧАСТЬ 5: ОБРАБОТЧИКИ ФОРМ, CRUD, ИИ-ПОМОЩНИК, ИНВЕСТИЦИИ
+    // ЧАСТЬ 6: ОБРАБОТЧИКИ ФОРМ, CRUD, ИИ, НАВИГАЦИЯ, ЗАПУСК
     // ================================================================
 
     // ============================================================
@@ -5702,7 +5735,7 @@
     }
 
     // ============================================================
-    // ТРАНЗАКЦИИ — СОХРАНЕНИЕ
+    // ТРАНЗАКЦИИ
     // ============================================================
     async function addTransaction(e) {
         e.preventDefault();
@@ -5717,13 +5750,13 @@
         const txs = await DB.getTransactions();
         txs.push(tx);
         await DB.setTransactions(txs);
-        if (category === 'GROCERIES') {
-            await promptAddToPantry(tx);
-        }
-        await addXP(10);
         closeModal();
+        await addXP(10);
         await renderAll();
         NotificationService.success('✅ ' + (type === 'INCOME' ? 'Доход' : 'Расход') + ' добавлен');
+        if (category === 'GROCERIES') {
+            setTimeout(() => promptAddToPantry(tx), 250);
+        }
     }
 
     async function saveEditedTransaction(e) {
@@ -5756,7 +5789,7 @@
     }
 
     // ============================================================
-    // КЛАДОВАЯ — СОХРАНЕНИЕ
+    // КЛАДОВАЯ
     // ============================================================
     async function addPantryItem(e) {
         e.preventDefault();
@@ -5832,7 +5865,7 @@
     }
 
     // ============================================================
-    // АВТО — СОХРАНЕНИЕ
+    // АВТО
     // ============================================================
     async function addMileage(e) {
         e.preventDefault();
@@ -5983,7 +6016,7 @@
     }
 
     // ============================================================
-    // ЖКХ — СОХРАНЕНИЕ
+    // ЖКХ
     // ============================================================
     async function addUtilityReading(e) {
         e.preventDefault();
@@ -6065,7 +6098,7 @@
     }
 
     // ============================================================
-    // ПОДПИСКИ — СОХРАНЕНИЕ
+    // ПОДПИСКИ
     // ============================================================
     async function addSubscription(e) {
         e.preventDefault();
@@ -6110,7 +6143,7 @@
     }
 
     // ============================================================
-    // ДОЛГИ — СОХРАНЕНИЕ
+    // ДОЛГИ
     // ============================================================
     async function addDebt(e) {
         e.preventDefault();
@@ -6156,7 +6189,7 @@
     }
 
     // ============================================================
-    // ЗАДАЧИ — СОХРАНЕНИЕ
+    // ЗАДАЧИ
     // ============================================================
     async function addTask(e) {
         e.preventDefault();
@@ -6212,7 +6245,7 @@
     }
 
     // ============================================================
-    // ЗАМЕТКИ — СОХРАНЕНИЕ
+    // ЗАМЕТКИ
     // ============================================================
     async function addNote(e) {
         e.preventDefault();
@@ -6253,7 +6286,7 @@
     }
 
     // ============================================================
-    // ДАТЫ — СОХРАНЕНИЕ
+    // ДАТЫ
     // ============================================================
     async function addDate(e) {
         e.preventDefault();
@@ -6298,7 +6331,7 @@
     }
 
     // ============================================================
-    // МАГАЗИНЫ — СОХРАНЕНИЕ
+    // МАГАЗИНЫ
     // ============================================================
     async function addShop(e) {
         e.preventDefault();
@@ -6348,7 +6381,7 @@
     }
 
     // ============================================================
-    // ИНВЕСТИЦИИ — СОХРАНЕНИЕ
+    // ИНВЕСТИЦИИ
     // ============================================================
     async function addInvestmentPortfolio(e) {
         e.preventDefault();
@@ -6552,7 +6585,7 @@
     }
 
     // ============================================================
-    // ШАБЛОНЫ — СОХРАНЕНИЕ
+    // ШАБЛОНЫ
     // ============================================================
     function toggleTemplateDate() {
         const period = document.getElementById('templatePeriod');
@@ -6625,6 +6658,9 @@
         NotificationService.success('🗑️ Удалено');
     }
 
+    // ============================================================
+    // FIX: processTemplates — не создаёт дубликаты
+    // ============================================================
     async function processTemplates() {
         const settings = await DB.getSettings();
         if (!settings.autoTemplates) return;
@@ -6634,15 +6670,16 @@
         let added = 0;
         for (const t of templates) {
             let trigger = false;
+            const autoDesc = t.description + ' (авто)';
             if (t.period === 'monthly' && t.day) {
                 if (today.getDate() === t.day) {
-                    const exists = txs.some(tx => tx.description === t.description && tx.date === getToday() && tx.amount === t.amount);
+                    const exists = txs.some(tx => tx.description === autoDesc && tx.date === getToday() && tx.amount === t.amount);
                     if (!exists) trigger = true;
                 }
             } else if (t.period === 'yearly' && t.date) {
                 const d = new Date(t.date);
                 if (today.getMonth() === d.getMonth() && today.getDate() === d.getDate()) {
-                    const exists = txs.some(tx => tx.description === t.description && tx.date === getToday() && tx.amount === t.amount);
+                    const exists = txs.some(tx => tx.description === autoDesc && tx.date === getToday() && tx.amount === t.amount);
                     if (!exists) trigger = true;
                 }
             }
@@ -6652,7 +6689,7 @@
                     type: 'EXPENSE',
                     amount: t.amount,
                     category: t.category,
-                    description: t.description + ' (авто)',
+                    description: autoDesc,
                     date: getToday(),
                     shop: ''
                 });
@@ -6667,7 +6704,7 @@
     }
 
     // ============================================================
-    // ОБРАЗОВАНИЕ — СОХРАНЕНИЕ
+    // ОБРАЗОВАНИЕ
     // ============================================================
     async function addEducationExpense(e) {
         e.preventDefault();
@@ -6736,7 +6773,7 @@
     }
 
     // ============================================================
-    // РЕМОНТ — СОХРАНЕНИЕ
+    // РЕМОНТ
     // ============================================================
     async function addRepairProject(e) {
         e.preventDefault();
@@ -6851,17 +6888,36 @@
         NotificationService.success('🗑️ Удалено');
     }
 
+    // FIX: addRepairStage без prompt()
     async function addRepairStage(projectId) {
-        const stageName = prompt('Введите название этапа:');
-        if (!stageName) return;
-        const projects = await DB.getRepairProjects();
-        const project = projects.find(p => p.id === projectId);
-        if (!project) { NotificationService.error('Проект не найден'); return; }
-        if (!project.stages) project.stages = [];
-        project.stages.push({ id: generateId(), name: stageName, done: false });
-        await DB.setRepairProjects(projects);
-        await renderAll();
-        NotificationService.success('✅ Этап добавлен');
+        const overlay = document.getElementById('modal-generic');
+        const content = document.getElementById('modalContent');
+        if (!overlay || !content) return;
+        content.innerHTML = `
+            <h3 class="title">➕ Новый этап ремонта</h3>
+            <form id="addRepairStageForm">
+                <div class="input-group">
+                    <label>Название этапа</label>
+                    <input type="text" id="stageNameInput" required placeholder="Например: Демонтаж плитки">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Добавить</button>
+            </form>
+        `;
+        overlay.classList.add('active');
+        document.getElementById('addRepairStageForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const stageName = document.getElementById('stageNameInput').value.trim();
+            if (!stageName) return;
+            const projects = await DB.getRepairProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) { NotificationService.error('Проект не найден'); closeModal(); return; }
+            if (!project.stages) project.stages = [];
+            project.stages.push({ id: generateId(), name: stageName, done: false });
+            await DB.setRepairProjects(projects);
+            closeModal();
+            await renderAll();
+            NotificationService.success('✅ Этап добавлен');
+        };
     }
 
     async function toggleRepairStage(projectId, stageId) {
@@ -6930,7 +6986,7 @@
     }
 
     // ============================================================
-    // ИИ-ПОМОЩНИК
+    // ИИ-ПОМОЩНИК — FIX: приветствие в конце
     // ============================================================
     async function getAIResponse(message) {
         const lower = message.toLowerCase().trim();
@@ -6947,13 +7003,8 @@
         const totalExpense = periodTxs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
         const balance = totalIncome - totalExpense;
 
-        // ПРИВЕТСТВИЯ
-        if (/(привет|здравствуй|доброе утро|добрый день|добрый вечер|хай|hi|hello)/.test(lower)) {
-            return `Привет! 👋 Твой баланс сейчас: ${formatMoney(balance)}. Что хочешь разобрать?`;
-        }
-
         // СПАСИБО
-        if (/(спасибо|благодар|thanks)/.test(lower)) {
+        if (/^(спасибо|благодар|thanks)/.test(lower)) {
             return `Всегда рада помочь! 😊 Удачи в достижении финансовых целей!`;
         }
 
@@ -7088,6 +7139,11 @@
             return `💰 Текущий период:\n\n• Доходы: ${formatMoney(totalIncome)}\n• Расходы: ${formatMoney(totalExpense)}\n• Баланс: ${formatMoney(balance)}\n\n${balance >= 0 ? '✅ Ты в плюсе!' : '❌ Баланс отрицательный.'}`;
         }
 
+        // ПРИВЕТСТВИЯ — только если сообщение короткое и не содержит ключевых слов
+        if (lower.length < 25 && /^(привет|здравствуй|доброе утро|добрый день|добрый вечер|хай|hi|hello)/.test(lower)) {
+            return `Привет! 👋 Твой баланс сейчас: ${formatMoney(balance)}. Что хочешь разобрать?`;
+        }
+
         // ДЕФОЛТ
         return `🤔 Я не совсем поняла вопрос. Попробуй один из вариантов:\n\n• «Разбор месяца» — подробный анализ\n• «Прогноз» — прогноз до конца периода\n• «Топ трат» — крупнейшие покупки\n• «Долги» — стратегия погашения\n• «Инвестиции» — анализ портфеля\n• «Экономия» — советы как сократить траты\n\nИли нажми на одну из карточек выше 👆`;
     }
@@ -7126,10 +7182,10 @@
             if (chat) chat.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
     }
-    // ============================================================
-    // НАСТРОЙКИ — СОХРАНЕНИЕ (восстановленные функции)
-    // ============================================================
 
+    // ============================================================
+    // НАСТРОЙКИ — СОХРАНЕНИЕ
+    // ============================================================
     async function saveSettings() {
         const nameEl = document.getElementById('settingsName');
         const genderEl = document.getElementById('settingsGender');
@@ -7146,7 +7202,6 @@
         settings.monthStartDay = parseInt(monthEl.value) || 1;
         await DB.setSettings(settings);
 
-        // ✅ Синхронизируем имя в user (для отображения на главной)
         const user = await DB.getUser();
         user.name = settings.name;
         await DB.setUser(user);
@@ -7165,7 +7220,6 @@
         settings.currency = el.value;
         await DB.setSettings(settings);
 
-        // Сбрасываем кэш валюты
         _currencyCacheTime = 0;
         await refreshCurrency(true);
 
@@ -7213,11 +7267,11 @@
         setTimeout(() => location.reload(), 1000);
     }
 
-    console.log('✅ Функции настроек восстановлены: saveSettings, saveCurrency, saveNotifications, saveAutoTemplates, setNewPin, resetAllData');
-        // ============================================================
-    // SUPABASE АВТОРИЗАЦИЯ
+    // ============================================================
+    // SUPABASE АВТОРИЗАЦИЯ (с guard)
     // ============================================================
     async function supabaseSignUp(email, password) {
+        if (!window.supabaseClient) { NotificationService.error('Supabase не настроен'); return null; }
         const { data, error } = await window.supabaseClient.auth.signUp({ email, password });
         if (error) { NotificationService.error('❌ ' + error.message); return null; }
         NotificationService.success('✅ Аккаунт создан! Проверьте email.');
@@ -7225,6 +7279,7 @@
     }
 
     async function supabaseSignIn(email, password) {
+        if (!window.supabaseClient) { NotificationService.error('Supabase не настроен'); return null; }
         const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
         if (error) { NotificationService.error('❌ ' + error.message); return null; }
         NotificationService.success('✅ Добро пожаловать!');
@@ -7232,56 +7287,7 @@
     }
 
     async function supabaseSignOut() {
-        await window.supabaseClient.auth.signOut();
-        NotificationService.info('👋 Вы вышли из аккаунта');
-    }
-
-    function openSupabaseAuth() {
-        const overlay = document.getElementById('modal-generic');
-        const content = document.getElementById('modalContent');
-        if (!overlay || !content) return;
-        content.innerHTML = '<h3 class="title">🔐 Вход в Finance OS</h3><form id="supabaseAuthForm"><div class="input-group"><label>Email</label><input type="email" id="authEmail" required placeholder="you@example.com"></div><div class="input-group"><label>Пароль (мин 6 символов)</label><input type="password" id="authPassword" required minlength="6"></div><div class="flex gap-8" style="margin-top:16px;"><button type="submit" class="btn btn-primary w-full" id="authSubmitBtn">Войти</button><button type="button" class="btn btn-secondary w-full" onclick="closeModal()">Отмена</button></div></form>';
-        overlay.classList.add('active');
-        let isRegister = false;
-        document.getElementById('supabaseAuthForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            const user = isRegister ? await supabaseSignUp(email, password) : await supabaseSignIn(email, password);
-            if (user) closeModal();
-        };
-        const form = document.getElementById('supabaseAuthForm');
-        const btn = document.getElementById('authSubmitBtn');
-        btn.addEventListener('dblclick', () => {
-            isRegister = !isRegister;
-            btn.textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
-        });
-    }
-
-    window.supabaseSignUp = supabaseSignUp;
-    window.supabaseSignIn = supabaseSignIn;
-    window.supabaseSignOut = supabaseSignOut;
-    window.openSupabaseAuth = openSupabaseAuth;
-        // ============================================================
-    // SUPABASE АВТОРИЗАЦИЯ
-    // ============================================================
-
-    async function supabaseSignUp(email, password) {
-        const { data, error } = await window.supabaseClient.auth.signUp({ email, password });
-        if (error) { NotificationService.error('❌ ' + error.message); return null; }
-        NotificationService.success('✅ Аккаунт создан! Проверьте email.');
-        return data.user;
-    }
-
-    async function supabaseSignIn(email, password) {
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) { NotificationService.error('❌ ' + error.message); return null; }
-        NotificationService.success('✅ Добро пожаловать!');
-        return data.user;
-    }
-
-    async function supabaseSignOut() {
-        await window.supabaseClient.auth.signOut();
+        if (window.supabaseClient) await window.supabaseClient.auth.signOut();
         NotificationService.info('👋 Вы вышли из аккаунта');
     }
 
@@ -7336,17 +7342,6 @@
         };
     }
 
-    window.supabaseSignUp = supabaseSignUp;
-    window.supabaseSignIn = supabaseSignIn;
-    window.supabaseSignOut = supabaseSignOut;
-    window.openSupabaseAuth = openSupabaseAuth;
-    console.log('✅ FinanceOS — Часть 5 (обработчики, CRUD, ИИ) загружена!');
-</script>
-<script>
-    // ================================================================
-    // ЧАСТЬ 6: НАВИГАЦИЯ, ИНИЦИАЛИЗАЦИЯ, ЗАПУСК, ЭКСПОРТЫ
-    // ================================================================
-
     // ============================================================
     // НАВИГАЦИЯ С ПРОВЕРКОЙ МОДУЛЕЙ
     // ============================================================
@@ -7356,7 +7351,6 @@
         const container = document.getElementById('pageContainer');
         if (!container) return;
 
-        // Проверяем, включён ли модуль (кроме core-страниц)
         if (!CORE_PAGES.includes(page)) {
             const enabled = await isModuleEnabled(page);
             if (!enabled) {
@@ -7428,7 +7422,6 @@
             `;
         }
 
-        // Обновляем активную ссылку
         document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
         const link = document.querySelector(`.nav-links a[data-page="${page}"]`);
         if (link) link.classList.add('active');
@@ -7459,7 +7452,7 @@
     }
 
     // ============================================================
-    // RIPPLE-ЭФФЕКТ ДЛЯ КНОПОК
+    // RIPPLE-ЭФФЕКТ
     // ============================================================
     function initRippleEffect() {
         document.addEventListener('pointerdown', (e) => {
@@ -7502,7 +7495,6 @@
             });
         }
 
-        // Закрытие меню по клику вне навбара
         document.addEventListener('click', function(e) {
             const nav = document.getElementById('navLinks');
             const toggle = document.getElementById('mobileToggle');
@@ -7523,7 +7515,6 @@
         const user = await DB.getUser();
         const txs = await DB.getTransactions();
 
-        // Синхронизируем имя из настроек в user
         if (settings.name && user.name !== settings.name) {
             user.name = settings.name;
             await DB.setUser(user);
@@ -7550,54 +7541,38 @@
     async function startApp() {
         const settings = await DB.getSettings();
 
-        // Синхронизируем имя между settings и user при каждом запуске
         const user = await DB.getUser();
         if (settings.name && user.name !== settings.name) {
             user.name = settings.name;
             await DB.setUser(user);
         }
 
-        // Применяем тему и лейаут
         setTheme(settings.theme || 'cosmos');
         initLayout();
 
-        // Инициализируем модули и навигацию
         await getModules();
         await updateNavVisibility();
 
-        // Звёзды и ripple
         createStars();
         initRippleEffect();
 
-        // Разрешение на уведомления
         requestNotificationPermission();
 
-        // Автообновление цен каждые 15 минут
         setInterval(updateAllPrices, 900000);
-        // Обработка шаблонов каждые 5 минут
         setInterval(processTemplates, 300000);
-        // Проверка сроков годности каждые 6 часов
         setInterval(checkExpiryDates, 6 * 60 * 60 * 1000);
 
-        // Ежедневные советы
         if (settings.notifications !== false) {
             scheduleDailyTips();
             setTimeout(() => sendDailyTip(), 5000);
         }
 
-        // Первичная обработка шаблонов
         await processTemplates();
-
-        // Обновляем datalist магазинов
         await refreshShopDatalist();
-
-        // Отрисовываем первую страницу
         await renderAll();
 
-        // Навешиваем обработчики навигации
         attachNavListeners();
 
-        // Проверка сроков через 3 секунды после старта
         setTimeout(() => checkExpiryDates(), 3000);
 
         console.log('🚀 FinanceOS запущен!');
@@ -7618,7 +7593,6 @@
             return;
         }
 
-        // Показываем корректный текст
         if (storedHash) {
             authOverlay.style.display = 'flex';
             authBtn.textContent = 'Войти';
@@ -7631,7 +7605,6 @@
             authError.style.color = '#FFB347';
         }
 
-        // Убираем дублирование обработчиков
         const newAuthBtn = authBtn.cloneNode(true);
         authBtn.parentNode.replaceChild(newAuthBtn, authBtn);
 
@@ -7648,7 +7621,6 @@
             const stored = EncryptedStorage.getPlain('passwordHash', null);
 
             if (stored) {
-                // Вход
                 if (hash === stored) {
                     const initOk = await SecurityService.init(password);
                     if (initOk) {
@@ -7667,7 +7639,6 @@
                     NotificationService.error('Неверный пароль');
                 }
             } else {
-                // Первый запуск
                 const initOk = await SecurityService.init(password);
                 if (initOk) {
                     EncryptedStorage.setPlain('passwordHash', hash);
@@ -7680,7 +7651,6 @@
             }
         });
 
-        // Enter в поле пароля
         const pwdInput = document.getElementById('masterPassword');
         if (pwdInput) {
             pwdInput.addEventListener('keydown', function(e) {
@@ -7701,10 +7671,8 @@
     });
 
     // ============================================================
-    // ЭКСПОРТЫ В WINDOW — ПОСЛЕ ОБЪЯВЛЕНИЯ ВСЕХ ФУНКЦИЙ
+    // ЭКСПОРТЫ В WINDOW
     // ============================================================
-
-    // ---------- ЯДРО ----------
     window.DB = DB;
     window.InvestmentStorage = InvestmentStorage;
     window.SecurityService = SecurityService;
@@ -7712,11 +7680,9 @@
     window.NotificationService = NotificationService;
     window.DataCache = DataCache;
 
-    // ---------- НАВИГАЦИЯ И РЕНДЕР ----------
     window.navigateTo = navigateTo;
     window.renderAll = renderAll;
 
-    // ---------- ТЕМЫ / ЛЕЙАУТЫ / МОДУЛИ ----------
     window.setTheme = setTheme;
     window.toggleTheme = toggleTheme;
     window.setLayout = setLayout;
@@ -7731,7 +7697,6 @@
     window.updateNavVisibility = updateNavVisibility;
     window.resetAllModules = resetAllModules;
 
-    // ---------- МОДАЛКИ И CRUD ----------
     window.openModal = openModal;
     window.closeModal = closeModal;
     window.addTransaction = addTransaction;
@@ -7790,56 +7755,46 @@
     window.addRepairStage = addRepairStage;
     window.toggleRepairStage = toggleRepairStage;
 
-    // ---------- БЮДЖЕТЫ И СПИСКИ ----------
     window.renderBudgetManagement = renderBudgetManagement;
     window.generateSmartShoppingList = generateSmartShoppingList;
 
-    // ---------- ИИ-ПОМОЩНИК ----------
     window.sendMessage = sendMessage;
     window.quickQuestion = quickQuestion;
     window.getAIResponse = getAIResponse;
     window.generateInsights = generateInsights;
     window.buildQuickActions = buildQuickActions;
 
-    // ---------- ИНВЕСТИЦИИ ----------
     window.updateAllPrices = updateAllPrices;
     window.fetchMoexPrice = fetchMoexPrice;
     window.addTaxReminder = addTaxReminder;
     window.showTaxInstruction = showTaxInstruction;
 
-    // ---------- ФИЛЬТРЫ И ПАГИНАЦИЯ ----------
     window.applyFinanceFilters = applyFinanceFilters;
     window.goToPage = goToPage;
 
-    // ---------- НАСТРОЙКИ ----------
     window.saveSettings = saveSettings;
     window.saveCurrency = saveCurrency;
     window.saveNotifications = saveNotifications;
     window.saveAutoTemplates = saveAutoTemplates;
     window.resetAllData = resetAllData;
 
-    // ---------- ЭКСПОРТ / ИМПОРТ ----------
     window.exportData = exportData;
     window.importData = importData;
 
-    // ---------- СРОКИ ГОДНОСТИ ----------
     window.checkExpiryDates = checkExpiryDates;
     window.setExpiryDate = setExpiryDate;
     window.promptAddToPantry = promptAddToPantry;
 
-    // ---------- ОТЧЁТЫ ----------
     window.changeReportMonth = changeReportMonth;
     window.renderMonthlyReport = renderMonthlyReport;
     window.renderGoodsAnalytics = renderGoodsAnalytics;
     window.analyzeGoods = analyzeGoods;
 
-    // ---------- ЦВЕТА МАГАЗИНОВ ----------
     window.getShopColor = getShopColor;
     window.getColorForGood = getColorForGood;
     window.getColorsForGoods = getColorsForGoods;
     window.refreshShopDatalist = refreshShopDatalist;
 
-    // ---------- ГЕЙМИФИКАЦИЯ И УТИЛИТЫ ----------
     window.addXP = addXP;
     window.formatMoney = formatMoney;
     window.formatDate = formatDate;
@@ -7853,10 +7808,13 @@
     window.getCurrentPeriod = getCurrentPeriod;
     window.refreshCurrency = refreshCurrency;
 
-    // ---------- ШАБЛОНЫ АВТОМАТИЗАЦИИ ----------
     window.processTemplates = processTemplates;
 
-    // ---------- КОНСТАНТЫ (для доступа из консоли) ----------
+    window.supabaseSignUp = supabaseSignUp;
+    window.supabaseSignIn = supabaseSignIn;
+    window.supabaseSignOut = supabaseSignOut;
+    window.openSupabaseAuth = openSupabaseAuth;
+
     window.CATEGORY_NAMES = CATEGORY_NAMES;
     window.CATEGORY_ICONS = CATEGORY_ICONS;
     window.ALL_CATEGORIES = ALL_CATEGORIES;
@@ -7869,13 +7827,11 @@
     window.TIPS_OF_DAY = TIPS_OF_DAY;
     window.MANTRAS = MANTRAS;
 
-    // ---------- ФУНКЦИИ ОЧИСТКИ КЭША ----------
     window.clearAppCache = function() {
         DataCache.invalidate();
         NotificationService.success('🧹 Кэш очищен');
     };
 
-    // ---------- ДИАГНОСТИКА ----------
     window.diagnose = function() {
         console.group('📊 FinanceOS Diagnostics');
         console.log('Тема:', localStorage.getItem('app_theme') || 'cosmos');
@@ -7887,7 +7843,7 @@
         console.groupEnd();
     };
 
-    console.log('✅ FinanceOS — Часть 6 (навигация, инициализация, экспорты) загружена!');
+    console.log('✅ FinanceOS — Часть 6 (обработчики, CRUD, ИИ) загружена!');
     console.log('📊 Версия 9.0 — 38 тем × 10 лейаутов × 16 модулей');
     console.log('🔐 Данные шифруются мастер-паролем (AES-GCM 256).');
     console.log('💡 Совет дня: ' + getTipOfDay());
