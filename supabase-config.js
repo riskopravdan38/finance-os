@@ -4,7 +4,7 @@
 
 // ⚠️ ЗАМЕНИТЕ ЭТИ ЗНАЧЕНИЯ НА ВАШИ ИЗ SUPABASE
 // Где взять: Supabase Dashboard → Settings → API
-const SUPABASE_URL = 'https://riskopravdan38.github.io/finance-os/';
+const SUPABASE_URL = 'https://riskopravdan38.supabase.co/finance-os/';
 const SUPABASE_ANON_KEY = 'sb_publishable_w5-wn3PMizlAUsZ-ACoUXw_tJBC9cCC';
 
 // Инициализация клиента — используем другое имя, 
